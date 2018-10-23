@@ -33,14 +33,14 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
       updateUserNames(event.asInstanceOf[UserNameUpdateEvent])
     } else if (lastSeenEvent.nonEmpty || event.isInstanceOf[SpawnEvent]) {
       // We want to log enriched events.  Each update call can potentially return a new one.
-      var eventToLog: Option[Event] = None
+      var enrichedEventToLog: Option[EnrichedEvent] = None
 
-      def possiblyLog(newConsideration: Option[Event]): Unit = {
+      def possiblyLog(newConsideration: Option[EnrichedEvent]): Unit = {
         if (newConsideration.isDefined) {
-          if (eventToLog.isDefined) {
-            throw new Exception(s"Attempting to log two enriched events!  eventToLog=$eventToLog and newConsideration=$newConsideration")
+          if (enrichedEventToLog.isDefined) {
+            throw new Exception(s"Attempting to log two enriched events!  eventToLog=$enrichedEventToLog and newConsideration=$newConsideration")
           } else {
-            eventToLog = newConsideration
+            enrichedEventToLog = newConsideration
           }
         }
       }
@@ -63,7 +63,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
       lastSeenEvent = Some(event)
 
       logEvent(event)
-      eventToLog.foreach(logEvent)
+      enrichedEventToLog.foreach(logEvent)
     } else {
       warn(s"Ignoring event sent before game can start: $event")
     }
@@ -79,7 +79,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
   private[this] val Player1 = Player(1)
 
-  private[this] def updateGameControlState(event: GameplayEvent): Option[Event] = {
+  private[this] def updateGameControlState(event: GameplayEvent): Option[EnrichedEvent] = {
     def logQueuedEvents(): Unit = {
       logQueue.foreach(logEvent)
       logQueue.clear()
@@ -206,7 +206,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
     None
   }
 
-  private[this] def updatePlayerState(event: GameplayEvent): Option[Event] = {
+  private[this] def updatePlayerState(event: GameplayEvent): Option[EnrichedEvent] = {
     event match {
       case e@UseMaidenEvent(_, _, tpe, player) =>
         tpe match {
@@ -286,7 +286,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
     None
   }
 
-  private[this] def updateBerryState(event: GameplayEvent): Option[Event] = {
+  private[this] def updateBerryState(event: GameplayEvent): Option[EnrichedEvent] = {
     event match {
       case e@BerryDepositEvent(x, _, player) =>
         player.currentState.hasFood = false
@@ -330,7 +330,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
     None
   }
 
-  private[this] def updateSnailState(event: GameplayEvent): Option[Event] = {
+  private[this] def updateSnailState(event: GameplayEvent): Option[EnrichedEvent] = {
     def recordSnailAt(newX: Int, player: Player): Unit = {
       player.distanceTraveledOnSnail += Math.abs(gameState.lastKnownSnailPosition - newX)
       gameState.lastKnownSnailPosition = newX
@@ -378,7 +378,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
     None
   }
 
-  private[this] def updateOtherStats(event: GameplayEvent): Option[Event] = {
+  private[this] def updateOtherStats(event: GameplayEvent): Option[EnrichedEvent] = {
     event match {
       case e@GlanceEvent(player1, player2) =>
         return Some(EnrichedGlanceEvent(player1.currentState, player2.currentState, e))
