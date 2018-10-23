@@ -1,0 +1,110 @@
+<html>
+<head>
+  <title>KillerQueen User List</title>
+  <script src="./jquery-3.3.1.min.js"></script>
+</head>
+
+<body>
+
+<form name="user_list" id="user_list" method="get" target="javascrpit">
+  <table border="0" cellpadding="4" cellspacing="1">
+    <tr>
+      <td>
+        <b>Blue Stripes:</b>
+      </td>
+      <td>
+        <input type="text" value="" name="blue_stripes"/>
+      </td>
+      <td>
+        <b>Gold Stripes:</b>
+      </td>
+      <td>
+        <input type="text" value="" name="gold_stripes"/>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <b>Blue Abs:</b>
+      </td>
+      <td>
+        <input type="text" value="" name="blue_abs"/>
+      </td>
+      <td>
+        <b>Gold Abs:</b>
+      </td>
+      <td>
+        <input type="text" value="" name="gold_abs"/>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <b>Blue Queen:</b>
+      </td>
+      <td>
+        <input type="text" value="" name="blue_queen"/>
+      </td>
+      <td>
+        <b>Gold Queen:</b>
+      </td>
+      <td>
+        <input type="text" value="" name="gold_queen"/>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <b>Blue Skulls:</b>
+      </td>
+      <td>
+        <input type="text" value="" name="blue_skulls"/>
+      </td>
+      <td>
+        <b>Gold Skulls:</b>
+      </td>
+      <td>
+        <input type="text" value="" name="gold_skulls"/>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <b>Blue Checkers:</b>
+      </td>
+      <td>
+        <input type="text" value="" name="blue_checkers"/>
+      </td>
+      <td>
+        <b>Gold Checkers:</b>
+      </td>
+      <td>
+        <input type="text" value="" name="gold_checkers"/>
+      </td>
+    </tr>
+  </table>
+
+  <input type="submit" value="Update Names"/>
+</form>
+
+<script type="text/javascript">
+  var colors = ["blue", "gold"];
+  var forms = ["stripes", "abs", "queen", "skulls", "checkers"];
+
+  $("#user_list").submit(function (e) {
+    e.preventDefault();
+
+    var dataToSend = {};
+    for (var i = 0; i < colors.length; i++) {
+      for (var j = 0; j < forms.length; j++) {
+        var key = colors[i] + "_" + forms[j];
+        dataToSend[key] = $(document.forms["user_list"][key]).val();
+      }
+    }
+
+    $.post(
+        "./updateUserNames",
+        dataToSend
+    );
+  });
+</script>
+
+</body>
+
+</html>
