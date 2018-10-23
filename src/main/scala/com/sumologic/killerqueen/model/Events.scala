@@ -53,56 +53,137 @@ object InboundEvents {
   case class ConnectedEvent(connectionId: Int)
     extends InboundEvent("connected", connectionId.toString)
 
+  /**
+    * Occurs right as the game ends.  It always occurs just before the [[VictoryEvent]].  It mirrors the
+    * [[GameStartEvent]] in terms of fields available.
+    *
+    * @param map      `map_day`, `map_dusk`, or `map_night`.  Will be one of these even if it's a bonus game.
+    * @param unknown1 Unknown boolean argument.  Might be `attract mode` configuration.
+    * @param duration Duration of the games in seconds.  Includes partial seconds (because it's a Double.)
+    * @param unknown2 Unknown boolean argument.  Might be `attract mode` configuration.
+    */
   case class GameEndEvent(map: String,
                           unknown1: Boolean,
                           duration: Double,
                           unknown2: Boolean)
     extends GameplayEvent("gameend", s"$map,${unknown1.toString.capitalize},$duration,${unknown2.toString.capitalize}")
 
+
+  /**
+    * Occurs after the 3... 2... 1... countdown.  Signals that players can start interacting with each other.  Most of
+    * the fields are not useful.
+    *
+    * @param map      `map_day`, `map_dusk`, or `map_night`.  Will be one of these even if it's a bonus game.
+    * @param unknown1 Unknown boolean argument.  Might be `attract mode` configuration.
+    * @param duration Always 0.0
+    * @param unknown2 Unknown boolean argument.  Might be `attract mode` configuration.
+    */
   case class GameStartEvent(map: String,
                             unknown1: Boolean,
                             duration: Int,
                             unknown2: Boolean)
     extends GameplayEvent("gamestart", s"$map,${unknown1.toString.capitalize},$duration,${unknown2.toString.capitalize}")
 
+  /**
+    * Occurs after the [[GameEndEvent]] event.  Tells us who won and how they won.
+    *
+    * @param team   `Gold` or `Blue`.
+    * @param `type` `military`, `economy`, or `snail`
+    */
   case class VictoryEvent(team: String,
                           `type`: String)
     extends GameplayEvent("victory", s"$team," + `type`)
 
+  /**
+    * Berry deposited into hole by minion of that same team.
+    *
+    * @param x
+    * @param y
+    * @param player
+    */
   case class BerryDepositEvent(x: Int,
                                y: Int,
                                player: Player)
     extends GameplayEvent("berryDeposit", s"$x,$y,${player.id}")
 
+  /**
+    * Berry kicked in by any player into any team's economy
+    *
+    * @param x
+    * @param y
+    * @param player
+    */
   case class BerryKickInEvent(x: Int,
                               y: Int,
                               player: Player)
     extends GameplayEvent("berryKickIn", s"$x,$y,${player.id}")
 
+  /**
+    * Player picked up a piece of food.
+    *
+    * @param player
+    */
   case class CarryFoodEvent(player: Player)
     extends GameplayEvent("carryFood", player.id.toString)
 
+  /**
+    * Queen tapped a maiden/gate
+    *
+    * @param x
+    * @param y
+    * @param team
+    */
   case class BlessMaidenEvent(x: Int,
                               y: Int,
                               team: String)
     extends GameplayEvent("blessMaiden", s"$x,$y,${if (team == "Gold") "Red" else team}")
 
+  /**
+    * Minion stepped into a maiden/gate.  The minion may still choose to leave the gate as they're not being using it yet.
+    *
+    * @param x
+    * @param y
+    * @param player
+    */
   case class ReserveMaidenEvent(x: Int,
                                 y: Int,
                                 player: Player)
     extends GameplayEvent("reserveMaiden", s"$x,$y,${player.id}")
 
+  /**
+    * Minion chose to leave the maiden/gate instead of using it.
+    *
+    * @param x
+    * @param y
+    * @param player
+    */
   case class UnreserveMaidenEvent(x: Int,
                                   y: Int,
                                   player: Player)
     extends GameplayEvent("unreserveMaiden", s"$x,$y,,${player.id}")
 
+  /**
+    * Minion actually used the maiden/gate to upgrade their character.
+    *
+    * @param x
+    * @param y
+    * @param `type` - `maiden_wings` or `maiden_speed`
+    * @param player
+    */
   case class UseMaidenEvent(x: Int,
                             y: Int,
                             `type`: String,
                             player: Player)
     extends GameplayEvent("useMaiden", s"$x,$y," + `type` + s",${player.id}")
 
+  /**
+    * Player has jumped off the snail OR was killed on the snail.  A [[PlayerKillEvent]] with the same `x` and `y`
+    * coordinates will immediately follow if they were killed.
+    *
+    * @param x
+    * @param y
+    * @param player
+    */
   case class GetOffSnailEvent(x: Int,
                               y: Int,
                               player: Player)
@@ -110,6 +191,13 @@ object InboundEvents {
     override def toApi: String = buildApiString("getOffSnail: ", rawValue)
   }
 
+  /**
+    * Player hopped on a snail
+    *
+    * @param x
+    * @param y
+    * @param player
+    */
   case class GetOnSnailEvent(x: Int,
                              y: Int,
                              player: Player)
@@ -118,22 +206,52 @@ object InboundEvents {
     override def toApi: String = buildApiString("getOnSnail: ", rawValue)
   }
 
+  /**
+    * Snail started eating another player.  The `victim` can still be saved though.
+    *
+    * @param x
+    * @param y
+    * @param rider
+    * @param victim
+    */
   case class SnailEatEvent(x: Int,
                            y: Int,
                            @JsonProperty("player1") rider: Player,
                            @JsonProperty("player2") victim: Player)
     extends GameplayEvent("snailEat", s"$x,$y,${rider.id},${victim.id}")
 
+  /**
+    * The rider of the snail was killed, and thus `player` escaped being eaten
+    *
+    * @param x
+    * @param y
+    * @param player
+    */
   case class SnailEscapeEvent(x: Int,
                               y: Int,
                               player: Player)
     extends GameplayEvent("snailEscape", s"$x,$y,${player.id}")
 
+  /**
+    * `player` glanced (ran into) `player2`.  (In the event of simultaneous/equal force, it appears to be randomly selected.)
+    *
+    * @param player1
+    * @param player2
+    */
   case class GlanceEvent(player1: Player,
                          player2: Player)
     extends GameplayEvent("glance", s"${player1.id},${player2.id}")
 
   // Worker, Soldier, and Queen are valid victimType
+  /**
+    * `player1` / `killer` killed `player2` / `victim`
+    *
+    * @param x
+    * @param y
+    * @param killer
+    * @param victim
+    * @param victimType - `Worker`, `Soldier`, or `Queen`
+    */
   case class PlayerKillEvent(x: Int,
                              y: Int,
                              @JsonProperty("player1") killer: Player,
@@ -141,9 +259,18 @@ object InboundEvents {
                              victimType: String)
     extends GameplayEvent("playerKill", s"$x,$y,${killer.id},${victim.id},$victimType")
 
+  /**
+    * Unused event still sent through by the cabinet
+    */
   case object PlayerNamesEvent
     extends GameplayEvent("playernames", ",,,,,,,,,")
 
+  /**
+    * `player` has joined the game.  If a bot is being replaced, this will trigger twice in a game for `player`.
+    *
+    * @param player
+    * @param isBot
+    */
   case class SpawnEvent(player: Player,
                         isBot: Boolean)
     extends GameplayEvent("spawn", s"${player.id},${isBot.toString.capitalize}")
