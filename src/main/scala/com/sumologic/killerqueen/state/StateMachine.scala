@@ -8,6 +8,14 @@ import com.sumologic.killerqueen.model._
 
 import scala.collection.mutable
 
+/**
+  * A [[StateMachine]] processes all [[GameplayEvent]]s and tracks the current [[GameState]] and [[PlayerState]] for all
+  * players.  It includes logic to detect "demo games", which are the games being shown when the KQ machine is idle.  Also,
+  * using other heuristics, it can detect if we're playing a bonus game.  (However, until a heuristic matches, it may
+  * incorrectly detect that we're in a regular game.)
+  *
+  * @param exitOnTest Call System.exit() on failure.  Useful to forcefully crash a UT on exception.  (May be better options to consider.)
+  */
 class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
   // VisibleForTesting - used to make sure certain events are happening
@@ -35,6 +43,11 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
       // We want to log enriched events.  Each update call can potentially return a new one.
       var enrichedEventToLog: Option[EnrichedEvent] = None
 
+      /**
+        * Sometimes we want to log an additional [[EnrichedEvent]].  This utility method keeps track of the ones to log.
+        * We have a hard constraint on only logging one [[EnrichedEvent]] per normal [[Event]].  The reasoning is that
+        * only one place truly owns an [[Event]], and thus only one place should record the [[EnrichedEvent]].
+        */
       def possiblyLog(newConsideration: Option[EnrichedEvent]): Unit = {
         if (newConsideration.isDefined) {
           if (enrichedEventToLog.isDefined) {
@@ -79,6 +92,9 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
   private[this] val Player1 = Player(1)
 
+  /**
+    * Game control state involves things such as game start/end, isDemoGame, and isBonusGame.
+    */
   private[this] def updateGameControlState(event: GameplayEvent): Option[EnrichedEvent] = {
     def logQueuedEvents(): Unit = {
       logQueue.foreach(logEvent)
@@ -206,6 +222,9 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
     None
   }
 
+  /**
+    * Player state involves the primary mutations to [[PlayerState]].
+    */
   private[this] def updatePlayerState(event: GameplayEvent): Option[EnrichedEvent] = {
     event match {
       case e@UseMaidenEvent(_, _, tpe, player) =>
@@ -286,6 +305,9 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
     None
   }
 
+  /**
+    * Tracking berries, including those scored, happens here.
+    */
   private[this] def updateBerryState(event: GameplayEvent): Option[EnrichedEvent] = {
     event match {
       case e@BerryDepositEvent(x, _, player) =>
@@ -330,6 +352,9 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
     None
   }
 
+  /**
+    * Sometimes these descriptors get redundant.
+    */
   private[this] def updateSnailState(event: GameplayEvent): Option[EnrichedEvent] = {
     def recordSnailAt(newX: Int, player: Player): Unit = {
       player.distanceTraveledOnSnail += Math.abs(gameState.lastKnownSnailPosition - newX)

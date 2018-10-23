@@ -2,6 +2,14 @@ package com.sumologic.killerqueen.state
 
 import com.sumologic.killerqueen.model.{Event, Player}
 
+/**
+  * [[PlayerState]] tracks all information related to a current [[Player]].  It is primarily focused on stats collection
+  *
+  * NOTE: Often there are more than 10 player states at the end of the game.  Bots are considered distinct from humans.
+  *
+  * @param player
+  * @param isBot
+  */
 class PlayerState(player: Player, isBot: Boolean) {
   val id: Int = player.id
   val isQueen: Boolean = player.isQueen
@@ -75,6 +83,9 @@ object PlayerState {
 }
 
 
+/**
+  * Built from [[PlayerState]], this is used to create the JSON event
+  */
 case class FinalPlayerState(id: Int,
 
                             name: String,

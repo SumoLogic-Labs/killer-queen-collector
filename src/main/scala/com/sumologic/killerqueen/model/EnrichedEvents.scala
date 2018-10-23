@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.sumologic.killerqueen.model.InboundEvents._
 import com.sumologic.killerqueen.state.PlayerState
 
+/**
+  * An [[EnrichedEvent]] provides additional context, such as the current state of the player executing the event.  The
+  * extra metadata provided varies from each type of event.
+  */
 sealed trait EnrichedEvent extends Event {
   val originalEvent: InboundEvent
 
@@ -15,6 +19,9 @@ sealed trait EnrichedEvent extends Event {
 object EnrichedEvents {
 
 
+  /**
+    * Generically enhance any event that is related to a single player
+    */
   case class PlayerStateEnrichedEvent(currentState: PlayerState.CurrentState,
                                       originalEvent: GameplayEvent
                                      ) extends EnrichedEvent

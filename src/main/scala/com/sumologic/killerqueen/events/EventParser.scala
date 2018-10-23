@@ -5,6 +5,8 @@ import com.sumologic.killerqueen.model.{InboundEvent, Player}
 import scala.util.matching.Regex
 
 /**
+  * Turns the KQ wire events into Scala objects that we can manipulate.
+  *
   * See:
   * - https://www.reddit.com/r/KillerQueen/comments/82tbug/feature_request_stats/dzghx0t
   * - https://github.com/killer-queen-stats/kqstats/wiki/Socket-Messages

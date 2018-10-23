@@ -4,6 +4,12 @@ import com.sumologic.killerqueen.model.{Event, XYConstants}
 
 import scala.collection.mutable
 
+/**
+  * State of a single game instance.  Object is replaced, not reset, when a new game starts.
+  *
+  * [[GameState]] contains a unique pattern: A ternary state dictated by Option[Boolean].  This is because until certain
+  * events occur, we can not determine if we're in a bonus or demo game, and choose not to guess.
+  */
 class GameState {
   val id = System.currentTimeMillis()
 
@@ -90,6 +96,9 @@ class GameState {
   }
 }
 
+/**
+  * Built from [[GameState]], this is used to create the JSON event
+  */
 case class FinalGameState(id: Long,
                           map: String,
                           victor: String,
