@@ -85,6 +85,22 @@ object PlayerState {
 
 /**
   * Built from [[PlayerState]], this is used to create the JSON event
+  *
+  * @param id            1-10 - from [[Player]]
+  * @param name          name of position - from [[Player]]
+  * @param userName      Configured name for player (if UI is used.)  "Bot $id" or "Player $id" if not set
+  * @param team          `Gold` or `Blue`
+  * @param foodDeposited Number of berries manually scored (always 0 for a queen)
+  * @param foodKickedInForMyTeam
+  * @param foodKickedInForOtherTeam
+  * @param lives         Number of lives used during game.  (Usually deaths + 1, except for military victories for queens)
+  * @param deaths
+  * @param kills
+  * @param snailEscapes  Escapes from being eaten by snail
+  * @param movedSnailDistance
+  * @param botAtEndOfGame
+  * @param warriorAtEndOfGame
+  * @param fastAtEndOfGame
   */
 case class FinalPlayerState(id: Int,
 

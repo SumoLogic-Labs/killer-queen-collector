@@ -98,6 +98,18 @@ class GameState {
 
 /**
   * Built from [[GameState]], this is used to create the JSON event
+  *
+  * @param id                     Unique ID for the run.  Is a unix timestamp triggered when [[StateMachine.reset()]] is called
+  * @param map                    `map_day`, `map_dusk`, `mao_night`, or `UNKNOWN` (error case only.)  Does not denote bonus game
+  * @param victor                 `Gold` or `Blue` - winning team
+  * @param winType                `military`, `economy`, `snail`, or `NO WIN TYPE` (error case only.)
+  * @param duration               Duration of game in seconds ([[Double.MinValue]] if unknown)
+  * @param isBonusGame
+  * @param goldQueenLivesRemaining
+  * @param blueQueenLivesRemaining
+  * @param goldBerriesRemaining
+  * @param blueBerriesRemaining
+  * @param lastKnownSnailPosition x coordinate of last known position of snail (can be potentially inaccurate)
   */
 case class FinalGameState(id: Long,
                           map: String,
