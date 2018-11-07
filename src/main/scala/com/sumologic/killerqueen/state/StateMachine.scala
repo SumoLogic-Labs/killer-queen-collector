@@ -66,7 +66,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
         possiblyLog(updateOtherStats(event))
       } catch {
         case e: Exception =>
-          error(e, s"Exception when processing $event.  Current state is ${gameState.toCaseClass} and playerMap is ${gameState.playerMap} and events to this point are ${allEvents.mkString("\n")}")
+          error(e, s"Exception when processing $event.  Current state is ${gameState.toCaseClass} and playerMap is ${gameState.playerMap} and events to this point are ${allEvents.mkString(", ")}")
           exceptionFound = true
           if (exitOnTest) {
             System.exit(1)
@@ -101,7 +101,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
       logQueue.clear()
     }
 
-    def isRegularGame(): Unit = {
+    def markAsRegularGame(): Unit = {
       if (gameState.isDemoGame.isEmpty || gameState.isBonusGame.isEmpty) {
         debug(s"Determined it is a regular game.  Dumping ${logQueue.size} logs now.  Triggered by $event")
         gameState.isDemoGame = false
@@ -110,7 +110,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
       }
     }
 
-    def isBonusGame(): Unit = {
+    def markAsBonusGame(): Unit = {
       if (gameState.isBonusGame.isEmpty) {
         debug(s"Determined it is a bonus game.  Triggered by $event")
         gameState.isBonusGame = true
@@ -126,7 +126,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
       }
     }
 
-    def isDemoGame(): Unit = {
+    def markAsDemoGame(): Unit = {
       if (gameState.isDemoGame.isEmpty) {
         debug(s"Determined it is a demo game.  Triggered by $event")
         gameState.isBonusGame = false
@@ -148,7 +148,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
         if (gameState.playerList.length < 10) {
           // Bonus game can start without all ten people
-          isBonusGame()
+          markAsBonusGame()
         }
 
       case VictoryEvent(team, tpe) =>
@@ -160,7 +160,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
         if (tpe == "economic" && gameState.isBonusGame.contains(true)) {
           throw new Exception("Invariant failed:  Economic victory in a bonus game")
         } else if (tpe == "military" && Player(1).totalDeaths <= 2 && Player(2).totalDeaths <= 2) {
-          isBonusGame()
+          markAsBonusGame()
         }
 
         gamesPlayed += 1
@@ -168,7 +168,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
       case SpawnEvent(_, true) =>
         // There are no bots in the bonus or demo games.  Bots also spawn after queens, so we know that this won't need
         // to trigger the "already spawned" code path
-        isRegularGame()
+        markAsRegularGame()
 
       case SpawnEvent(Player1, false) if gameState.playerMap.contains(1) =>
         // If we're asked to spawn Player1 again, then we know its a new game (demo or otherwise.)  The issue is that
@@ -185,7 +185,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
         eventsToReplay.foreach(processEvent)
 
       case CarryFoodEvent(_) if !gameState.inProgress =>
-        isDemoGame()
+        markAsDemoGame()
 
       case CarryFoodEvent(player) if player.totalDeaths == 0 =>
         // In a bonus game, you can't carry food unless you died
@@ -193,7 +193,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
       case BlessMaidenEvent(_, 20, _) =>
         // The only game mode with a maiden at this position is the bonus game
-        isBonusGame()
+        markAsBonusGame()
 
       case _: ReserveMaidenEvent | _: UnreserveMaidenEvent | _: UseMaidenEvent =>
         // These are all events that don't happen in demo game
@@ -204,12 +204,12 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
         // If the game reports a Soldier or Queen died, but we didn't think they're a warrior, then bonus game
         if (!victim.currentState.isWarrior && !victim.isQueen && (victimType == "Soldier" || victimType == "Queen")) {
-          isBonusGame()
+          markAsBonusGame()
         }
 
         // If you're not a warrior AND not on the snail AND not queen, and killed someone, then bonus game)
         if (!killer.isQueen && !killer.currentState.isWarrior && !killer.currentState.isOnSnail) {
-          isBonusGame()
+          markAsBonusGame()
         }
 
       case _: BerryDepositEvent | _: BerryKickInEvent =>
