@@ -12,7 +12,7 @@ class EventJsonSerializerTest extends TestBase {
       val event = ConnectedEvent(1)
       val sut = new EventJsonSerializer(gs)
       sut.toJson(event) should be(
-        s"""{"connectionId":1,"event":"${event.event}","rawValue":"${event.rawValue}","gameId":${gs.id},"apiVersion":${sut.ApiVersion}}""")
+        s"""{"connectionId":1,"event":"${event.event}","rawValue":"${event.rawValue}","gameId":${gs.id},"apiVersion":${sut.ApiVersion},"secondsSinceGameStart":0}""")
     }
   }
 

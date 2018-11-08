@@ -12,6 +12,7 @@ import scala.collection.mutable
   */
 class GameState {
   val id = System.currentTimeMillis()
+  val startTime = id
 
   var map: Option[String] = None
 

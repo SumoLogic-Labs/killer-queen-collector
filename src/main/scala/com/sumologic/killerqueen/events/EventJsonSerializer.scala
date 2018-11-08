@@ -19,6 +19,7 @@ class EventJsonSerializer(gameState: GameState) {
       writerFor(event.getClass).
       withAttribute("gameId", gameState.id).
       withAttribute("apiVersion", ApiVersion).
+      withAttribute("secondsSinceGameStart", (System.currentTimeMillis() - gameState.startTime) / 1000).
       writeValueAsString(event)
   }
 
@@ -27,6 +28,7 @@ class EventJsonSerializer(gameState: GameState) {
       writerFor(event.getClass).
       withAttribute("gameId", gameState.id).
       withAttribute("apiVersion", ApiVersion).
+      withAttribute("secondsSinceGameStart", (System.currentTimeMillis() - gameState.startTime) / 1000).
       writeValueAsString(event)
   }
 
@@ -39,6 +41,7 @@ class EventJsonSerializer(gameState: GameState) {
           writerFor(event.getClass).
           withAttribute("gameId", gameState.id).
           withAttribute("apiVersion", ApiVersion).
+          withAttribute("secondsSinceGameStart", (System.currentTimeMillis() - gameState.startTime) / 1000).
           writeValueAsString(event)
     }
   }
@@ -57,7 +60,8 @@ class EventJsonSerializer(gameState: GameState) {
 @JsonAppend(
   attrs = Array(
     new JsonAppend.Attr(value = "gameId"),
-    new JsonAppend.Attr(value = "apiVersion")
+    new JsonAppend.Attr(value = "apiVersion"),
+    new JsonAppend.Attr(value = "secondsSinceGameStart")
   )
 )
 trait GameEvent
