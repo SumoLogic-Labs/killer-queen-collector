@@ -102,11 +102,6 @@ class GameState {
           }
       }
 
-      if (isBonusGame.contains(false)) {
-        require(bots + normalWorkers + speedWorkers + normalWarriors + speedWarriors == 4,
-          s"Player must be accounted for! Got $bots $normalWorkers $speedWorkers $normalWarriors $speedWarriors")
-      }
-
       (bots, normalWorkers, speedWorkers, normalWarriors, speedWarriors)
     }
 
@@ -149,7 +144,7 @@ class GameState {
 }
 
 /**
-  * Built from [[GameState]], this is used to create the JSON event
+  * Built from [[GameState]], this is used to create the JSON event. This is overloaded to also be `gameState` event type.
   *
   * @param id                     Unique ID for the run.  Is a unix timestamp triggered when [[StateMachine.reset()]] is called
   * @param map                    `map_day`, `map_dusk`, `mao_night`, or `UNKNOWN` (error case only.)  Does not denote bonus game
@@ -199,5 +194,5 @@ case class FinalGameState(id: Long,
                           goldSpeedWarriors: Int,
 
                           lastKnownSnailPosition: Int) extends Event {
-  val event = "finalGameState"
+  val event = "finalGameState" // This is also gameState.
 }
