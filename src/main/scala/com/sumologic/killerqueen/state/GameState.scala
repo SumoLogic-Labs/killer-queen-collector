@@ -74,6 +74,45 @@ class GameState {
     val goldBerriesScored = berriesScored("Gold", goldPlayers, bluePlayers)
     val blueBerriesScored = berriesScored("Blue", bluePlayers, goldPlayers)
 
+    def playerTypes(team: String): (Int, Int, Int, Int, Int) = {
+      val players = playerMap.values.filter(p => !p.isQueen && p.team == team)
+
+      var bots = 0
+      var normalWorkers = 0
+      var speedWorkers = 0
+      var normalWarriors = 0
+      var speedWarriors = 0
+
+      players.foreach {
+        player =>
+          if (player.currentState.isBot) {
+            bots += 1
+          } else if (player.currentState.isWarrior) {
+            if (player.currentState.isFast) {
+              speedWarriors += 1
+            } else {
+              normalWarriors += 1
+            }
+          } else  {
+            if (player.currentState.isFast) {
+              speedWorkers += 1
+            } else {
+              normalWorkers += 1
+            }
+          }
+      }
+
+      if (isBonusGame.contains(false)) {
+        require(bots + normalWorkers + speedWorkers + normalWarriors + speedWarriors == 4,
+          s"Player must be accounted for! Got $bots $normalWorkers $speedWorkers $normalWarriors $speedWarriors")
+      }
+
+      (bots, normalWorkers, speedWorkers, normalWarriors, speedWarriors)
+    }
+
+    val (blueBots, blueNormalWorkers, blueSpeedWorkers, blueNormalWarriors, blueSpeedWarriors) = playerTypes("Blue")
+    val (goldBots, goldNormalWorkers, goldSpeedWorkers, goldNormalWarriors, goldSpeedWarriors) = playerTypes("Gold")
+
     FinalGameState(
       id,
       map.getOrElse("UNKNOWN"),
@@ -87,6 +126,18 @@ class GameState {
 
       12 - goldBerriesScored,
       12 - blueBerriesScored,
+
+      blueBots,
+      blueNormalWorkers,
+      blueSpeedWorkers,
+      blueNormalWarriors,
+      blueSpeedWarriors,
+
+      goldBots,
+      goldNormalWorkers,
+      goldSpeedWorkers,
+      goldNormalWarriors,
+      goldSpeedWarriors,
 
       lastKnownSnailPosition
     )
@@ -110,6 +161,16 @@ class GameState {
   * @param blueQueenLivesRemaining
   * @param goldBerriesRemaining
   * @param blueBerriesRemaining
+  * @param blueBots
+  * @param blueNormalWorkers
+  * @param blueSpeedWorkers
+  * @param blueNormalWarriors
+  * @param blueSpeedWarriors
+  * @param goldBots
+  * @param goldNormalWorkers
+  * @param goldSpeedWorkers
+  * @param goldNormalWarriors
+  * @param goldSpeedWarriors
   * @param lastKnownSnailPosition x coordinate of last known position of snail (can be potentially inaccurate)
   */
 case class FinalGameState(id: Long,
@@ -124,6 +185,18 @@ case class FinalGameState(id: Long,
 
                           goldBerriesRemaining: Int,
                           blueBerriesRemaining: Int,
+
+                          blueBots: Int,
+                          blueNormalWorkers: Int,
+                          blueSpeedWorkers: Int,
+                          blueNormalWarriors: Int,
+                          blueSpeedWarriors: Int,
+
+                          goldBots: Int,
+                          goldNormalWorkers: Int,
+                          goldSpeedWorkers: Int,
+                          goldNormalWarriors: Int,
+                          goldSpeedWarriors: Int,
 
                           lastKnownSnailPosition: Int) extends Event {
   val event = "finalGameState"
