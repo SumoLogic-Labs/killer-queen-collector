@@ -50,7 +50,7 @@ class GameState {
   var lastKnownSnailPosition: Int = XYConstants.ScreenWidth / 2
 
 
-  def toCaseClass: FinalGameState = {
+  def toFinalGameState: FinalGameState = {
     val queenLives = if (isBonusGame.contains(true)) {
       2
     } else {
@@ -93,7 +93,7 @@ class GameState {
   }
 
   override def toString(): String = {
-    toCaseClass.toString
+    toFinalGameState.toString
   }
 }
 

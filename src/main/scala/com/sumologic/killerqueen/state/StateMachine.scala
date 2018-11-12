@@ -66,7 +66,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
         possiblyLog(updateOtherStats(event))
       } catch {
         case e: Exception =>
-          error(e, s"Exception when processing $event.  Current state is ${gameState.toCaseClass} and playerMap is ${gameState.playerMap} and events to this point are ${allEvents.mkString(", ")}")
+          error(e, s"Exception when processing $event.  Current state is ${gameState.toFinalGameState} and playerMap is ${gameState.playerMap} and events to this point are ${allEvents.mkString(", ")}")
           exceptionFound = true
           if (exitOnTest) {
             System.exit(1)
@@ -425,10 +425,10 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
   }
 
   def reset(triggerEvent: Event): Unit = synchronized {
-    logEvent(gameState.toCaseClass)
+    logEvent(gameState.toFinalGameState)
 
     gameState.playerList.foreach {
-      playerState => logEvent(playerState.toCaseClass)
+      playerState => logEvent(playerState.toFinalPlayerState)
     }
 
     gameState = new GameState

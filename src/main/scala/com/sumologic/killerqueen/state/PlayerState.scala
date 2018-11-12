@@ -30,7 +30,7 @@ class PlayerState(player: Player, isBot: Boolean) {
 
   var distanceTraveledOnSnail: Int = 0
 
-  def toCaseClass: FinalPlayerState = {
+  def toFinalPlayerState: FinalPlayerState = {
     FinalPlayerState(
       id,
       player.name,
@@ -51,7 +51,7 @@ class PlayerState(player: Player, isBot: Boolean) {
   }
 
   override def toString(): String = {
-    toCaseClass.toString
+    toFinalPlayerState.toString
   }
 }
 
