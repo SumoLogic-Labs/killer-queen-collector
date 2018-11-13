@@ -427,7 +427,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
     if (gameState.isDemoGame.contains(false)) {
       val jsonEvent = eventSerializer.toJson(event)
       event match {
-        case state: FinalGameState if state.map == "UNKNOWN" =>
+        case state: FinalGameState if state.victor == "NO VICTOR" =>
           // This is a hack, but it lets me not maintain two identical classes...
           info(jsonEvent.replace(state.event, "gameState"))
         case _ =>
