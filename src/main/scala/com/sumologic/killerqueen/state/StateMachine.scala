@@ -144,6 +144,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
       case GameStartEvent(map, _, _, _) =>
         gameState.map = Some(map)
         gameState.inProgress = true
+        gameState.startTime = System.currentTimeMillis()
         gameState.isDemoGame = false // No start event for demo games
 
         if (gameState.playerList.length < 10) {
