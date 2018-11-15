@@ -1,5 +1,7 @@
 package com.sumologic.killerqueen
 
+import java.util.{Timer, TimerTask}
+
 import akka.Done
 import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.Http
@@ -26,6 +28,7 @@ object Main extends App with Logging {
   private val stateMachine: StateMachine = new StateMachine
   startWebserver(stateMachine)
   connectToCabinet(stateMachine)
+  startLoggingClock(stateMachine)
 
   private def startWebserver(stateMachine: StateMachine): Unit = {
     val route =
@@ -106,5 +109,13 @@ object Main extends App with Logging {
     info("Attempt to start connection to cabinet done.  Waiting.")
 
     ws ! TextMessage.Strict("![k[connect],v[{\"name\":\"1\",\"isGameMachine\":false}]]!")
+  }
+
+  private def startLoggingClock(machine: StateMachine): Unit = {
+    val task = new TimerTask {
+      override def run(): Unit = machine.logCurrentGameState()
+    }
+
+    new Timer(true).schedule(task, 0, 1000)
   }
 }

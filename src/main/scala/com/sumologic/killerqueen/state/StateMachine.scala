@@ -25,7 +25,6 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
   // VisibleForTesting - these five are reset on reset() calls
   private[state] var gameState: GameState = new GameState
   private[state] var lastSeenEvent: Option[GameplayEvent] = None
-  private[state] var lastSeenState: Option[FinalGameState] = None
   private var logQueue: mutable.Buffer[Event] = mutable.Buffer[Event]()
   private var allEvents: mutable.Buffer[Event] = mutable.Buffer[Event]()
   private var eventSerializer = new EventJsonSerializer(gameState)
@@ -78,12 +77,6 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
       logEvent(event)
       enrichedEventToLog.foreach(logEvent)
-
-      val newFinal = gameState.toFinalGameState
-      if (!lastSeenState.contains(newFinal)) {
-        logEvent(newFinal)
-        lastSeenState = Some(newFinal)
-      }
     } else {
       warn(s"Ignoring event sent before game can start: $event")
     }
@@ -425,17 +418,18 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
     allEvents.append(event)
 
     if (gameState.isDemoGame.contains(false)) {
-      val jsonEvent = eventSerializer.toJson(event)
-      event match {
-        case state: FinalGameState if state.victor == "NO VICTOR" =>
-          // This is a hack, but it lets me not maintain two identical classes...
-          info(jsonEvent.replace(state.event, "gameState"))
-        case _ =>
-          info(jsonEvent)
-      }
+      info(eventSerializer.toJson(event))
     } else if (gameState.isDemoGame.isEmpty) {
       // Queue up the events to be recorded later.  We'll know quickly if this is a demo game or not
       logQueue.append(event)
+    }
+  }
+
+  def logCurrentGameState(): Unit = synchronized {
+    if (gameState.inProgress) {
+      val gameEvent = gameState.toFinalGameState
+      val json = eventSerializer.toJson(gameEvent)
+      info(json.replace(gameEvent.event, "gameState"))
     }
   }
 
@@ -448,7 +442,6 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
     gameState = new GameState
     lastSeenEvent = None
-    lastSeenState = None
     logQueue = mutable.Buffer[Event]()
     allEvents = mutable.Buffer[Event]()
     eventSerializer = new EventJsonSerializer(gameState)
