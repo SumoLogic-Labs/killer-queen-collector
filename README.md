@@ -4,6 +4,15 @@ JSON payloads to be logged and analyzed. It additionally enriches the stream of 
 There is also the optional ability to use a simple UI to assign player names so that you can consistently track player 
 performance over time.
 
+## Running the KQ Collector
+1. Checkout this repository locally
+2. (Optional) Configure the application to send the logs to Sumo Logic
+3. Ensure your computer is on the same network as the Killer Queen cabinet. (http://kq.local should load)
+4. Execute `bin/run.sh`
+
+### Sending Data to Sumo Logic
+We've included an [example log4j2 configuration file](https://github.com/SumoLogic/killer-queen-collector/blob/master/src/main/resources/sample_log4j2.xml) that you can copy to `log4j2.xml` and use.  Replace `REDACTED` with an HTTP source URL.  For information on how to get your HTTP source URL, see [the help docs](https://help.sumologic.com/?cid=4035).
+
 ## Core Concepts
 ### Event
 The core concept is that everything is an `Event`.  In code, there are a few sub types: `InboundEvent`, `OutboundEvent`, 
