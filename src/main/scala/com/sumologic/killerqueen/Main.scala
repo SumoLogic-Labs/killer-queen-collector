@@ -18,7 +18,6 @@ import com.sumologic.killerqueen.state.StateMachine
 import spray.json.DefaultJsonProtocol._
 
 import scala.concurrent.Future
-import scala.reflect.io.File
 
 object Main extends App with Logging {
   private implicit val system = ActorSystem()
@@ -27,7 +26,7 @@ object Main extends App with Logging {
 
   private implicit val userNameFormat = jsonFormat10(UserNameUpdateEvent)
 
-  private val logFile = new File(new JFile("./logs/raw.log"))
+  private val logFile = new JFile("./logs/raw.log")
   private val messageRecorder = new RawMessageRecorder(logFile)
 
   private val stateMachine: StateMachine = new StateMachine
@@ -59,7 +58,7 @@ object Main extends App with Logging {
 
     Http().bindAndHandle(route, "localhost", 8080)
 
-    info(s"Server online at http://localhost:8080/ - Logging to ${logFile.path}")
+    info(s"Server online at http://localhost:8080/ - Logging to ${logFile.getPath}")
   }
 
   private def connectToCabinet(stateMachine: StateMachine): Unit = {

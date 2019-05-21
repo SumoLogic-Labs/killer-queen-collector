@@ -1,8 +1,9 @@
 package com.sumologic.killerqueen.events
 
+import java.io.{File, FileWriter}
+
 import com.sumologic.killerqueen.Logging
 
-import scala.reflect.io.File
 import scala.util.control.NonFatal
 
 /**
@@ -12,12 +13,18 @@ import scala.util.control.NonFatal
   */
 class RawMessageRecorder(file: File) extends Logging {
 
-  file.createFile() // Ensure it exists
+  file.createNewFile() // Ensure it exists
 
   def writeToFile(message: String): Unit = {
     try {
-      synchronized {
-        file.appendAll(message, "\n")
+      val fw = new FileWriter(file, true)
+      try {
+        synchronized {
+          fw.write(message)
+          fw.write("\n")
+        }
+      } finally {
+        fw.close()
       }
     } catch {
       case NonFatal(e) =>
