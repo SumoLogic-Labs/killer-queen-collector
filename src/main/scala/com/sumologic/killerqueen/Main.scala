@@ -1,5 +1,6 @@
 package com.sumologic.killerqueen
 
+import java.io.{File => JFile}
 import java.util.{Timer, TimerTask}
 
 import akka.Done
@@ -11,12 +12,13 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.ContentTypeResolver.Default
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.stream.{ActorMaterializer, OverflowStrategy}
-import com.sumologic.killerqueen.events.{ActorRefEventSender, EventHandler, EventParser}
+import com.sumologic.killerqueen.events.{ActorRefEventSender, EventHandler, EventParser, RawMessageRecorder}
 import com.sumologic.killerqueen.model.InboundEvents.UserNameUpdateEvent
 import com.sumologic.killerqueen.state.StateMachine
 import spray.json.DefaultJsonProtocol._
 
 import scala.concurrent.Future
+import scala.reflect.io.File
 
 object Main extends App with Logging {
   private implicit val system = ActorSystem()
@@ -24,6 +26,9 @@ object Main extends App with Logging {
   private implicit val executionContext = system.dispatcher
 
   private implicit val userNameFormat = jsonFormat10(UserNameUpdateEvent)
+
+  private val logFile = new File(new JFile("./logs/raw.log"))
+  private val messageRecorder = new RawMessageRecorder(logFile)
 
   private val stateMachine: StateMachine = new StateMachine
   startWebserver(stateMachine)
@@ -54,11 +59,10 @@ object Main extends App with Logging {
 
     Http().bindAndHandle(route, "localhost", 8080)
 
-    info(s"Server online at http://localhost:8080/")
+    info(s"Server online at http://localhost:8080/ - Logging to ${logFile.path}")
   }
 
   private def connectToCabinet(stateMachine: StateMachine): Unit = {
-
     val req = WebSocketRequest(uri = "ws://kq.local:12749")
     val webSocketFlow = Http().webSocketClientFlow(req)
 
@@ -70,6 +74,7 @@ object Main extends App with Logging {
     val messageSink: Sink[Message, Future[Done]] =
       Sink.foreach[Message] {
         case message: TextMessage.Strict =>
+          messageRecorder.writeToFile(message.text)
           handlerOpt match {
             case Some(handler) =>
               debug(s"Received message $message")
