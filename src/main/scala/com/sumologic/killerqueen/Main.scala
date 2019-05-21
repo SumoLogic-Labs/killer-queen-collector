@@ -38,8 +38,8 @@ object Main extends App with Logging {
         }
       } ~ path("index.html") {
         getFromResource("index.html")
-      } ~ path("jquery-3.3.1.min.js") {
-        getFromResource("jquery-3.3.1.min.js")
+      } ~ path("jquery-3.4.1.min.js") {
+        getFromResource("jquery-3.4.1.min.js")
       } ~ path("updateUserNames") {
         post {
           formFields('blue_stripes, 'blue_abs, 'blue_queen, 'blue_skulls, 'blue_checkers, 'gold_stripes, 'gold_abs, 'gold_queen, 'gold_skulls, 'gold_checkers) {
