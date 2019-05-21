@@ -9,6 +9,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.ws.{Message, TextMessage, WebSocketRequest, WebSocketUpgradeResponse}
 import akka.http.scaladsl.model.{StatusCodes, _}
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.StandardRoute
 import akka.http.scaladsl.server.directives.ContentTypeResolver.Default
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.stream.{ActorMaterializer, OverflowStrategy}
@@ -53,6 +54,20 @@ object Main extends App with Logging {
               stateMachine.processEvent(update)
               complete("done")
           }
+        }
+      } ~ pathPrefix("names") {
+        lazy val currentUser = stateMachine.currentUsers
+        def safeGet(i: Int): String = currentUser.get(i).getOrElse("Botholomew")
+        def safeRender(team: String, offset: Int): StandardRoute = {
+          val autoRefresh = s"<script>setTimeout(function() {location.href = location.href;}, 5000);</script>"
+          complete(HttpEntity(ContentTypes.`text/html(UTF-8)`,
+            s"<h1>${safeGet(3 + offset)} - ${safeGet(5 + offset)} - ${safeGet(1 + offset)} - ${safeGet(7 + offset)} - ${safeGet(9 + offset)}</h1> " + autoRefresh))
+        }
+
+        path("blue") {
+          safeRender("blue", offset = 1)
+        } ~ path("gold") {
+          safeRender("gold", offset = 0)
         }
       }
 
