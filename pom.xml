@@ -9,7 +9,8 @@
   <inceptionYear>2018</inceptionYear>
 
   <properties>
-    <scala.version>2.11.8</scala.version>
+    <scala.version.major>2.12</scala.version.major>
+    <scala.version>${scala.version.major}.8</scala.version>
   </properties>
 
   <repositories>
@@ -40,7 +41,7 @@
     <!-- json -->
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
-      <artifactId>jackson-module-scala_2.11</artifactId>
+      <artifactId>jackson-module-scala_${scala.version.major}</artifactId>
       <version>2.9.6</version>
     </dependency>
 
@@ -68,17 +69,17 @@
     <!-- akka, for websockets -->
     <dependency>
       <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-http_2.11</artifactId>
+      <artifactId>akka-http_${scala.version.major}</artifactId>
       <version>10.1.5</version>
     </dependency>
     <dependency>
       <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-stream_2.11</artifactId>
+      <artifactId>akka-stream_${scala.version.major}</artifactId>
       <version>2.5.16</version>
     </dependency>
     <dependency>
       <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-http-spray-json_2.11</artifactId>
+      <artifactId>akka-http-spray-json_${scala.version.major}</artifactId>
       <version>10.1.5</version>
     </dependency>
 
@@ -86,7 +87,7 @@
     <!-- test test -->
     <dependency>
       <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_2.11</artifactId>
+      <artifactId>scalatest_${scala.version.major}</artifactId>
       <version>3.0.5</version>
       <scope>test</scope>
     </dependency>
@@ -127,7 +128,7 @@
         </executions>
         <configuration>
           <checkMultipleScalaVersions>true</checkMultipleScalaVersions>
-          <scalaCompatVersion>2,11</scalaCompatVersion>
+          <scalaCompatVersion>2,12</scalaCompatVersion>
           <failOnMultipleScalaVersions>true</failOnMultipleScalaVersions>
           <args>
             <arg>-target:jvm-1.8</arg>
@@ -137,8 +138,6 @@
             <arg>-language:implicitConversions</arg>
             <arg>-unchecked</arg>
             <arg>-feature</arg>
-            <arg>-Ybackend:GenBCode</arg>
-            <arg>-optimise</arg>
           </args>
           <jvmArgs>
             <jvmArg>-client</jvmArg>
