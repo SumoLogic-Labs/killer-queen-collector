@@ -1,5 +1,6 @@
 package com.sumologic.killerqueen
 
+import java.io.{File => JFile}
 import java.util.{Timer, TimerTask}
 
 import akka.Done
@@ -8,10 +9,11 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.ws.{Message, TextMessage, WebSocketRequest, WebSocketUpgradeResponse}
 import akka.http.scaladsl.model.{StatusCodes, _}
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.StandardRoute
 import akka.http.scaladsl.server.directives.ContentTypeResolver.Default
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.stream.{ActorMaterializer, OverflowStrategy}
-import com.sumologic.killerqueen.events.{ActorRefEventSender, EventHandler, EventParser}
+import com.sumologic.killerqueen.events.{ActorRefEventSender, EventHandler, EventParser, RawMessageRecorder}
 import com.sumologic.killerqueen.model.InboundEvents.UserNameUpdateEvent
 import com.sumologic.killerqueen.state.StateMachine
 import spray.json.DefaultJsonProtocol._
@@ -24,6 +26,9 @@ object Main extends App with Logging {
   private implicit val executionContext = system.dispatcher
 
   private implicit val userNameFormat = jsonFormat10(UserNameUpdateEvent)
+
+  private val logFile = new JFile("./logs/raw.log")
+  private val messageRecorder = new RawMessageRecorder(logFile)
 
   private val stateMachine: StateMachine = new StateMachine
   startWebserver(stateMachine)
@@ -38,8 +43,8 @@ object Main extends App with Logging {
         }
       } ~ path("index.html") {
         getFromResource("index.html")
-      } ~ path("jquery-3.3.1.min.js") {
-        getFromResource("jquery-3.3.1.min.js")
+      } ~ path("jquery-3.4.1.min.js") {
+        getFromResource("jquery-3.4.1.min.js")
       } ~ path("updateUserNames") {
         post {
           formFields('blue_stripes, 'blue_abs, 'blue_queen, 'blue_skulls, 'blue_checkers, 'gold_stripes, 'gold_abs, 'gold_queen, 'gold_skulls, 'gold_checkers) {
@@ -50,15 +55,28 @@ object Main extends App with Logging {
               complete("done")
           }
         }
+      } ~ pathPrefix("names") {
+        lazy val currentUser = stateMachine.currentUsers
+        def safeGet(i: Int): String = currentUser.get(i).getOrElse("Botholomew")
+        def safeRender(team: String, offset: Int): StandardRoute = {
+          val autoRefresh = s"<script>setTimeout(function() {location.href = location.href;}, 5000);</script>"
+          complete(HttpEntity(ContentTypes.`text/html(UTF-8)`,
+            s"<h1>${safeGet(3 + offset)} - ${safeGet(5 + offset)} - ${safeGet(1 + offset)} - ${safeGet(7 + offset)} - ${safeGet(9 + offset)}</h1> " + autoRefresh))
+        }
+
+        path("blue") {
+          safeRender("blue", offset = 1)
+        } ~ path("gold") {
+          safeRender("gold", offset = 0)
+        }
       }
 
     Http().bindAndHandle(route, "localhost", 8080)
 
-    info(s"Server online at http://localhost:8080/")
+    info(s"Server online at http://localhost:8080/ - Logging to ${logFile.getPath}")
   }
 
   private def connectToCabinet(stateMachine: StateMachine): Unit = {
-
     val req = WebSocketRequest(uri = "ws://kq.local:12749")
     val webSocketFlow = Http().webSocketClientFlow(req)
 
@@ -70,6 +88,7 @@ object Main extends App with Logging {
     val messageSink: Sink[Message, Future[Done]] =
       Sink.foreach[Message] {
         case message: TextMessage.Strict =>
+          messageRecorder.writeToFile(message.text)
           handlerOpt match {
             case Some(handler) =>
               debug(s"Received message $message")

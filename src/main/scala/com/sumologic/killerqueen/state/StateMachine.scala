@@ -82,6 +82,12 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
     }
   }
 
+  def currentUsers: UserNameUpdateEvent = synchronized {
+    currentNamesOpt.getOrElse {
+      UserNameUpdateEvent("", "", "", "", "", "", "", "", "", "")
+    }
+  }
+
   private[this] def updateUserNames(e: UserNameUpdateEvent): Unit = {
     currentNamesOpt = Some(e)
     gameState.playerMap.foreach {
