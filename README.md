@@ -35,5 +35,12 @@ A `Player` is a singular reference to the position on the cabinet.  i.e. Player 
 In a single play of a game, there is a `PlayerState` that can be used to track the current state of any given character. 
 They have an attribute that is a `Player`.
 
+### Sumo Logic Dashboards
+Included is `Killer Queen - Live Game.json` 
+
+#### Installation
+Find and replace `$$killerqueen` in with the `_sourcecategory` of the data.
+[Import](https://help.sumologic.com/05Search/Library/Export-and-Import-Content-in-the-Library#Import_Content_in_the_Library) the modified json.
+
 ### Additional Terminology
 - A `Maiden` is the game's codified name for gates that minions can use to upgrade their player
