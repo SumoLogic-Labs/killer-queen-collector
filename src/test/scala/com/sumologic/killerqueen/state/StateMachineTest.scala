@@ -491,7 +491,9 @@ class StateMachineTest extends TestBase with BeforeAndAfterEach with Logging {
       | IN: ![k[playernames],v[,,,,,,,,,]]!
       | IN: ![k[carryFood],v[5]]!
       | IN: ![k[carryFood],v[8]]!
-      | IN: ![k[glance],v[5,8]]!""".stripMargin
+      | IN: ![k[blessMaiden],v[1720,140,Blue]]!
+      | IN: ![k[glance],v[1455,902,5,8]]!
+      | IN: ![k[playerKill],v[1495,897,5,8,Soldier]]!""".stripMargin
 
   private[this] val secondDemoGameScript =
     """IN: ![k[spawn],v[1,False]]!
@@ -514,6 +516,7 @@ class StateMachineTest extends TestBase with BeforeAndAfterEach with Logging {
       | IN: ![k[carryFood],v[10]]!
       | IN: ![k[carryFood],v[8]]!
       | IN: ![k[getOnSnail: ],v[960,11,7]]!
+      | IN: ![k[playerKill],v[751,462,2,1,Queen]]!
       | IN: ![k[blessMaiden],v[960,500,Blue]]!
       | IN: ![k[blessMaiden],v[1360,260,Blue]]!
       | IN: ![k[carryFood],v[3]]!

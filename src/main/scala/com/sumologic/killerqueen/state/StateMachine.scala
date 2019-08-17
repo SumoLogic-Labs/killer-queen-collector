@@ -206,15 +206,18 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
         gameState.ensureNot(GameType.DemoGame)
 
       case PlayerKillEvent(_, _, killer, victim, victimType) =>
-        gameState.ensureNot(GameType.DemoGame) // Doesn't happen in demo game either
-
         // If the game reports a Soldier or Queen died, but we didn't think they're a warrior, then bonus game
-        if (!victim.currentState.isWarrior && !victim.isQueen && (victimType == "Soldier" || victimType == "Queen")) {
-          markAsMilitaryBonusGame()
+        // One bonus script includes a warrior who didn't get upgraded, so if it's snot demo, then this is what we want
+        if (!victim.currentState.isWarrior && !victim.isQueen && (victimType == "Soldier" || victimType == "Queen")
+          && gameState.gameType != GameType.DemoGame) {
+            markAsMilitaryBonusGame()
+
         }
 
         // If you're not a warrior AND not on the snail AND not queen, and killed someone, then bonus game)
-        if (!killer.isQueen && !killer.currentState.isWarrior && !killer.currentState.isOnSnail) {
+        // One bonus script includes a warrior who didn't get upgraded, so if it's snot demo, then this is what we want
+        if (!killer.isQueen && !killer.currentState.isWarrior && !killer.currentState.isOnSnail
+          && gameState.gameType != GameType.DemoGame) {
           markAsMilitaryBonusGame()
         }
 
