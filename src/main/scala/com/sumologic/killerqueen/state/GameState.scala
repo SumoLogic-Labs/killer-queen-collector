@@ -52,10 +52,10 @@ class GameState {
 
 
   def toFinalGameState: FinalGameState = {
-    val queenLives = if (isBonusGame.contains(true)) {
-      2
-    } else {
-      3
+    val queenLives = gameType match {
+      case Some(GameType.SnailBonusGame) => 5
+      case Some(GameType.MilitaryBonusGame) => 2
+      case _ => 3
     }
 
     val goldQueenDeaths = playerMap.get(1).map(_.totalDeaths).getOrElse(0)
