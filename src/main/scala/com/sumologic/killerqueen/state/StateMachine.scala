@@ -127,6 +127,18 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
       }
     }
 
+    def markAsSnailBonusGame(): Unit = {
+      debug(s"Determined it is a snail bonus game.  Triggered by $event")
+      gameState.gameType = GameType.SnailBonusGame
+      logQueuedEvents()
+      gameState.playerList.foreach {
+        playerState =>
+          if (playerState.totalDeaths == 0 && playerState.isQueen) {
+            playerState.currentState.isFast = true
+          }
+      }
+    }
+
     def markAsDemoGame(): Unit = {
       debug(s"Determined it is a demo game.  Triggered by $event")
       gameState.gameType = GameType.DemoGame
@@ -166,6 +178,8 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
           throw new Exception("Invariant failed:  Economic victory in a bonus game")
         } else if (tpe == "military" && Player(1).totalDeaths <= 2 && Player(2).totalDeaths <= 2) {
           markAsMilitaryBonusGame()
+        } else if (Player(1).totalDeaths > 3 || Player(2).totalDeaths > 3) {
+          markAsSnailBonusGame()
         }
 
         gamesPlayed += 1
@@ -197,10 +211,9 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
         gameState.ensureNot(GameType.MilitaryBonusGame)
 
       case BlessMaidenEvent(_, 20, _) =>
-        // The only game mode with a maiden at this position is the bonus game
-        markAsMilitaryBonusGame()
-
-        // TODO: Add maiden locations for snail bonus game
+        // The only game mode with a maiden at this position is the bonus game, but it can be snail or military...
+        gameState.ensureNot(GameType.RegularGame)
+        gameState.ensureNot(GameType.DemoGame)
 
       case _: ReserveMaidenEvent | _: UnreserveMaidenEvent | _: UseMaidenEvent =>
         // These are all events that don't happen in demo game
@@ -220,6 +233,11 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
         if (!killer.isQueen && !killer.currentState.isWarrior && !killer.currentState.isOnSnail
           && gameState.gameType != GameType.DemoGame) {
           markAsMilitaryBonusGame()
+        }
+
+        if (victim.isQueen && victim.totalDeaths == 3) {
+          // You died again after 3 deaths?  Well, clearly snail bonus.
+          markAsSnailBonusGame()
         }
 
       case _: BerryDepositEvent | _: BerryKickInEvent =>
