@@ -13,29 +13,26 @@ class StateMachineTest extends TestBase with BeforeAndAfterEach with Logging {
       "they're fresh and standalone" in {
         parseAndRunEvents(regularGame)
 
-        sut.gameState.isDemoGame should be(Some(false))
-        sut.gameState.isBonusGame should be(Some(false))
+        sut.gameState.gameType should be(GameType.RegularGame)
       }
 
       "they follow a demo game" in {
         parseAndRunEvents(firstDemoGameScript)
         parseAndRunEvents(regularGame)
 
-        sut.gameState.isDemoGame should be(Some(false))
+        sut.gameState.gameType should be(GameType.RegularGame)
       }
     }
 
     "correctly recognize demo games" when {
       "its script one" in {
         parseAndRunEvents(firstDemoGameScript)
-        sut.gameState.isDemoGame should be(Some(true))
-        sut.gameState.isBonusGame should be(Some(false))
+        sut.gameState.gameType should be(GameType.DemoGame)
       }
 
       "its script two" in {
         parseAndRunEvents(secondDemoGameScript)
-        sut.gameState.isDemoGame should be(Some(true))
-        sut.gameState.isBonusGame should be(Some(false))
+        sut.gameState.gameType should be(GameType.DemoGame)
       }
     }
 
@@ -44,14 +41,14 @@ class StateMachineTest extends TestBase with BeforeAndAfterEach with Logging {
       "military victory happens with two queen kills" in {
         parseAndRunEvents(bonusGameUnknownStart)
 
-        sut.gameState.isBonusGame should be(None) // Don't know yet
+        sut.gameState.gameType should be(GameType.UnknownGame)
 
         sut.processEvent(PlayerKillEvent(0, 0, Player(1), Player(2), "Queen"))
         sut.processEvent(PlayerKillEvent(0, 0, Player(1), Player(2), "Queen"))
         sut.processEvent(GameEndEvent("map_dusk", false, 20.07644, false))
         sut.processEvent(VictoryEvent("Gold", "military"))
 
-        sut.gameState.isBonusGame should be(Some(true))
+        sut.gameState.gameType should be(GameType.MilitaryBonusGame)
       }
 
       "less than ten players are spawned at the start" in {
@@ -60,7 +57,7 @@ class StateMachineTest extends TestBase with BeforeAndAfterEach with Logging {
         sut.processEvent(PlayerNamesEvent)
         sut.processEvent(GameStartEvent("map_dusk", false, 0, false))
 
-        sut.gameState.isBonusGame should be(Some(true))
+        sut.gameState.gameType should be(GameType.MilitaryBonusGame)
 
         // Check for spawning as fast warrior after bonus game is detected
         sut.processEvent(SpawnEvent(Player(3), false))
@@ -74,7 +71,7 @@ class StateMachineTest extends TestBase with BeforeAndAfterEach with Logging {
         Player(4).currentState.isWarrior should be(false)
 
         sut.processEvent(PlayerKillEvent(0, 0, Player(3), Player(1), "Queen"))
-        sut.gameState.isBonusGame should be(Some(true))
+        sut.gameState.gameType should be(GameType.MilitaryBonusGame)
 
         Player(1).currentState.isFast should be(false)
         Player(2).currentState.isFast should be(true) // Got promoted
@@ -87,7 +84,7 @@ class StateMachineTest extends TestBase with BeforeAndAfterEach with Logging {
       "queen kills an unexpected soldier" in {
         parseAndRunEvents(bonusGameUnknownStart)
         sut.processEvent(PlayerKillEvent(0, 0, Player(1), Player(3), "Soldier"))
-        sut.gameState.isBonusGame should be(Some(true))
+        sut.gameState.gameType should be(GameType.MilitaryBonusGame)
       }
     }
 
@@ -597,10 +594,9 @@ class StateMachineTest extends TestBase with BeforeAndAfterEach with Logging {
     }
 
     // If win by snail, teams total should be exactly the same as the expected distance
-    // This won't be right on snail bonus game, so ignoring that case for now
+    // TODO: This won't be right on snail bonus game, so ignoring that case for now
     if (sut.gameState.winType.contains("snail")
-      && sut.gameState.isBonusGame.contains(false)
-      && sut.gameState.isDemoGame.contains(false)) {
+      && sut.gameState.gameType == GameType.RegularGame) {
       val (playersOnWinningTeam, playersOnLosingTeam) = sut.gameState.playerList.partition(_.team == sut.gameState.victor.get)
       val winningTeamDistance = playersOnWinningTeam.map(_.distanceTraveledOnSnail).sum
       val losingTeamDistance = playersOnLosingTeam.map(_.distanceTraveledOnSnail).sum
@@ -615,8 +611,8 @@ class StateMachineTest extends TestBase with BeforeAndAfterEach with Logging {
     Player(1).foodDeposited should be(0)
     Player(2).foodDeposited should be(0)
 
-    // Can't score food in a bonus gain
-    if (sut.gameState.isBonusGame.contains(true)) {
+    // Can't score food in a bonus game
+    if (sut.gameState.gameType == GameType.MilitaryBonusGame || sut.gameState.gameType == GameType.SnailBonusGame) {
       sut.gameState.playerList.foreach {
         player =>
           player.foodDeposited should be(0)

@@ -36,9 +36,7 @@ class GameState {
     }
   }
 
-  // TODO: Kill isBonusGame and isDemoGame
-  def isBonusGame: Option[Boolean] = _gameType.map(_ == GameType.MilitaryBonusGame)
-
+  // TODO: Kill isDemoGame
   def isDemoGame: Option[Boolean] = _gameType.map(_ == GameType.DemoGame)
 
   var victor: Option[String] = None

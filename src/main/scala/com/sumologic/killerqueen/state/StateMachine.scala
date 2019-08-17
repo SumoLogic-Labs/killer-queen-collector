@@ -108,25 +108,21 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
     }
 
     def markAsRegularGame(): Unit = {
-      if (gameState.isDemoGame.isEmpty || gameState.isBonusGame.isEmpty) {
-        debug(s"Determined it is a regular game.  Dumping ${logQueue.size} logs now.  Triggered by $event")
-        gameState.gameType = GameType.RegularGame
-        logQueuedEvents()
-      }
+      debug(s"Determined it is a regular game.  Dumping ${logQueue.size} logs now.  Triggered by $event")
+      gameState.gameType = GameType.RegularGame
+      logQueuedEvents()
     }
 
     def markAsBonusGame(): Unit = {
-      if (gameState.isBonusGame.isEmpty) {
-        debug(s"Determined it is a bonus game.  Triggered by $event")
-        gameState.gameType = GameType.MilitaryBonusGame
-        logQueuedEvents()
-        gameState.playerList.foreach {
-          playerState =>
-            if (playerState.totalDeaths == 0) {
-              playerState.currentState.isFast = true
-              playerState.currentState.isWarrior = !playerState.isQueen
-            }
-        }
+      debug(s"Determined it is a bonus game.  Triggered by $event")
+      gameState.gameType = GameType.MilitaryBonusGame
+      logQueuedEvents()
+      gameState.playerList.foreach {
+        playerState =>
+          if (playerState.totalDeaths == 0) {
+            playerState.currentState.isFast = true
+            playerState.currentState.isWarrior = !playerState.isQueen
+          }
       }
     }
 
@@ -161,7 +157,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
         gameState.ensureNot(GameType.DemoGame) // No victory event for demo games
 
-        if (tpe == "economic" && gameState.isBonusGame.contains(true)) {
+        if (tpe == "economic" && (gameState.gameType == GameType.MilitaryBonusGame || gameState.gameType == GameType.SnailBonusGame)) {
           throw new Exception("Invariant failed:  Economic victory in a bonus game")
         } else if (tpe == "military" && Player(1).totalDeaths <= 2 && Player(2).totalDeaths <= 2) {
           markAsBonusGame()
@@ -250,10 +246,10 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
         killer.totalKills += 1
 
         if (victim.isQueen) {
-          val maxQueenLives = if (gameState.isBonusGame.contains(true)) {
-            2
-          } else {
-            3
+          val maxQueenLives = gameState.gameType match {
+            case GameType.SnailBonusGame => 5
+            case GameType.MilitaryBonusGame => 2
+            case _ => 3
           }
 
           if (victim.totalDeaths < maxQueenLives) {
@@ -263,7 +259,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
           victim.totalLives += 1
         }
 
-        val deathLocation: String = if (gameState.isBonusGame.contains(true)) {
+        val deathLocation: String = if (gameState.gameType == GameType.MilitaryBonusGame || gameState.gameType == GameType.SnailBonusGame) {
           XYConstants.locationForXYOnMap(x, y, XYConstants.BonusGameMap)
         } else {
           XYConstants.locationForXYOnMap(x, y, gameState.map.getOrElse("unknown"))
@@ -282,7 +278,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
         gameState.playerMap.put(player.id, state)
         gameState.playerList.append(state)
 
-        if (gameState.isBonusGame.contains(true)) {
+        if (gameState.gameType == GameType.MilitaryBonusGame) {
           // We're ok to use ternary here.  We promote stats whenever we detect a bonus game as well
           player.currentState.isFast = true
           player.currentState.isWarrior = !player.isQueen
