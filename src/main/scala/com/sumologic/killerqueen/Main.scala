@@ -1,7 +1,7 @@
 package com.sumologic.killerqueen
 
 import java.io.{File => JFile}
-import java.util.{Timer, TimerTask}
+import java.util.{Calendar, Date, GregorianCalendar, Timer, TimerTask}
 
 import akka.Done
 import akka.actor.{ActorRef, ActorSystem}
@@ -27,7 +27,19 @@ object Main extends App with Logging {
 
   private implicit val userNameFormat = jsonFormat10(UserNameUpdateEvent)
 
-  private val logFile = new JFile("./logs/raw.log")
+  private val logFile = {
+    def pad(n: Int): String = {
+      if(n > 10) n.toString else s"0$n"
+    }
+    // NOTE: We intentionally don't support rotating days, because this way the game logs are kept together
+    val cal = new GregorianCalendar()
+
+    val year = cal.get(Calendar.YEAR)
+    val month = pad(cal.get(Calendar.MONTH))
+    val day = pad(cal.get(Calendar.DAY_OF_MONTH) + 1)
+
+    new JFile(s"./logs/raw_event_log_$year-$month-$day.log")
+  }
   private val messageRecorder = new RawMessageRecorder(logFile)
 
   private val stateMachine: StateMachine = new StateMachine
