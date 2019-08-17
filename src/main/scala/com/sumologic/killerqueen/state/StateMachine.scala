@@ -69,6 +69,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
           error(e, s"Exception when processing $event.  Current state is ${gameState.toFinalGameState} and playerMap is ${gameState.playerMap} and events to this point are ${allEvents.mkString(", ")}")
           exceptionFound = true
           if (exitOnTest) {
+            warn(s"Exiting because exitOnTest=$exitOnTest")
             System.exit(1)
           }
       }

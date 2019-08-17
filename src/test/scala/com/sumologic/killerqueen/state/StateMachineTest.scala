@@ -564,7 +564,14 @@ class StateMachineTest extends TestBase with BeforeAndAfterEach with Logging {
 
     if (useHandler) {
       val parsedEvents = splitEvents.map(EventParser.parse)
-      parsedEvents.foreach(handler.handle)
+      parsedEvents.zipWithIndex.foreach {
+        case (event, idx) =>
+          if (idx % 1000 == 0) {
+            warn(s"Processing line $idx")
+          }
+
+          handler.handle(event)
+      }
     } else {
 
       val parsedEvents = splitEvents.map(EventParser.parse).filter {
