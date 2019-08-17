@@ -57,7 +57,9 @@ object Main extends App with Logging {
         }
       } ~ pathPrefix("names") {
         lazy val currentUser = stateMachine.currentUsers
+
         def safeGet(i: Int): String = currentUser.get(i).getOrElse("Botholomew")
+
         def safeRender(team: String, offset: Int): StandardRoute = {
           val autoRefresh = s"<script>setTimeout(function() {location.href = location.href;}, 5000);</script>"
           complete(HttpEntity(ContentTypes.`text/html(UTF-8)`,

@@ -2,9 +2,9 @@
 <Configuration>
   <Appenders>
     <SumoLogicAppender
-        name="SumoAppender"
-        url="REDACTED">
-      <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss,SSS Z} [%t] %-5p %c - %m%n" />
+      name="SumoAppender"
+      url="REDACTED">
+      <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss,SSS Z} [%t] %-5p %c - %m%n"/>
     </SumoLogicAppender>
     <Console name="STDOUT" target="SYSTEM_OUT">
       <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss,SSS Z} [%t] %-5p %c - %m%n"/>
@@ -12,8 +12,8 @@
   </Appenders>
   <Loggers>
     <Root level="all" additivity="false">
-      <AppenderRef ref="SumoAppender" level="info" />
-      <AppenderRef ref="STDOUT" />
+      <AppenderRef ref="SumoAppender" level="info"/>
+      <AppenderRef ref="STDOUT"/>
     </Root>
   </Loggers>
 </Configuration>

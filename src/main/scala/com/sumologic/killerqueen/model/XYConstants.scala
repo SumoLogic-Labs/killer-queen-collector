@@ -1,8 +1,8 @@
 package com.sumologic.killerqueen.model
 
 /**
-  * Set of utilities related to parsing (X,Y) tuples into actionable pieces of information.
-  */
+ * Set of utilities related to parsing (X,Y) tuples into actionable pieces of information.
+ */
 object XYConstants {
 
   // This is configurable in console settings and not accurate at the start for all cabinets.  The StateMachine will

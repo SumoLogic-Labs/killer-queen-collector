@@ -5,11 +5,11 @@ import com.sumologic.killerqueen.model.{Event, XYConstants}
 import scala.collection.mutable
 
 /**
-  * State of a single game instance.  Object is replaced, not reset, when a new game starts.
-  *
-  * [[GameState]] contains a unique pattern: A ternary state dictated by Option[Boolean].  This is because until certain
-  * events occur, we can not determine if we're in a bonus or demo game, and choose not to guess.
-  */
+ * State of a single game instance.  Object is replaced, not reset, when a new game starts.
+ *
+ * [[GameState]] contains a unique pattern: A ternary state dictated by Option[Boolean].  This is because until certain
+ * events occur, we can not determine if we're in a bonus or demo game, and choose not to guess.
+ */
 class GameState {
   val id = System.currentTimeMillis()
   var startTime = 0L
@@ -93,7 +93,7 @@ class GameState {
             } else {
               normalWarriors += 1
             }
-          } else  {
+          } else {
             if (player.currentState.isFast) {
               speedWorkers += 1
             } else {
@@ -144,30 +144,30 @@ class GameState {
 }
 
 /**
-  * Built from [[GameState]], this is used to create the JSON event. This is overloaded to also be `gameState` event type.
-  *
-  * @param id                     Unique ID for the run.  Is a unix timestamp triggered when [[StateMachine.reset()]] is called
-  * @param map                    `map_day`, `map_dusk`, `mao_night`, or `UNKNOWN` (error case only.)  Does not denote bonus game
-  * @param victor                 `Gold` or `Blue` - winning team
-  * @param winType                `military`, `economy`, `snail`, or `NO WIN TYPE` (error case only.)
-  * @param duration               Duration of game in seconds ([[Double.MinValue]] if unknown)
-  * @param isBonusGame
-  * @param goldQueenLivesRemaining
-  * @param blueQueenLivesRemaining
-  * @param goldBerriesRemaining
-  * @param blueBerriesRemaining
-  * @param blueBots
-  * @param blueNormalWorkers
-  * @param blueSpeedWorkers
-  * @param blueNormalWarriors
-  * @param blueSpeedWarriors
-  * @param goldBots
-  * @param goldNormalWorkers
-  * @param goldSpeedWorkers
-  * @param goldNormalWarriors
-  * @param goldSpeedWarriors
-  * @param lastKnownSnailPosition x coordinate of last known position of snail (can be potentially inaccurate)
-  */
+ * Built from [[GameState]], this is used to create the JSON event. This is overloaded to also be `gameState` event type.
+ *
+ * @param id                     Unique ID for the run.  Is a unix timestamp triggered when [[StateMachine.reset()]] is called
+ * @param map                    `map_day`, `map_dusk`, `mao_night`, or `UNKNOWN` (error case only.)  Does not denote bonus game
+ * @param victor                 `Gold` or `Blue` - winning team
+ * @param winType                `military`, `economy`, `snail`, or `NO WIN TYPE` (error case only.)
+ * @param duration               Duration of game in seconds ([[Double.MinValue]] if unknown)
+ * @param isBonusGame
+ * @param goldQueenLivesRemaining
+ * @param blueQueenLivesRemaining
+ * @param goldBerriesRemaining
+ * @param blueBerriesRemaining
+ * @param blueBots
+ * @param blueNormalWorkers
+ * @param blueSpeedWorkers
+ * @param blueNormalWarriors
+ * @param blueSpeedWarriors
+ * @param goldBots
+ * @param goldNormalWorkers
+ * @param goldSpeedWorkers
+ * @param goldNormalWarriors
+ * @param goldSpeedWarriors
+ * @param lastKnownSnailPosition x coordinate of last known position of snail (can be potentially inaccurate)
+ */
 case class FinalGameState(id: Long,
                           map: String,
                           victor: String,

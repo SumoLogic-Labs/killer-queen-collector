@@ -7,12 +7,12 @@ import com.sumologic.killerqueen.model.{GameplayEvent, InboundEvent}
 import com.sumologic.killerqueen.state.StateMachine
 
 /**
-  * Handles all incoming events and delegates relevant [[GameplayEvent]] to [[StateMachine]].
-  *
-  * @param eventSender
-  * @param stateMachine Allows injection of mocked or test [[StateMachine]] for UTs
-  * @param victoryHook  Callback hook used for helping with UTs.  Called before [[StateMachine]] is reset
-  */
+ * Handles all incoming events and delegates relevant [[GameplayEvent]] to [[StateMachine]].
+ *
+ * @param eventSender
+ * @param stateMachine Allows injection of mocked or test [[StateMachine]] for UTs
+ * @param victoryHook  Callback hook used for helping with UTs.  Called before [[StateMachine]] is reset
+ */
 class EventHandler(eventSender: EventSender,
                    stateMachine: StateMachine = new StateMachine,
                    victoryHook: () => Unit = () => {}

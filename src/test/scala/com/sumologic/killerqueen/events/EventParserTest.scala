@@ -10,6 +10,7 @@ class EventParserTest extends TestBase {
   "EventParser" should {
     "Handle known input types" in {
       val eventAndResult = mutable.Buffer[(String, InboundEvent)]()
+
       def parseAndRecord(event: String): InboundEvent = {
         val result = EventParser.parse(event)
         eventAndResult.append((event, result))
