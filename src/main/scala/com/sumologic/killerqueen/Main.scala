@@ -15,6 +15,7 @@ import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.stream.{ActorMaterializer, OverflowStrategy}
 import com.sumologic.killerqueen.events.{ActorRefEventSender, EventHandler, EventParser, RawMessageRecorder}
 import com.sumologic.killerqueen.model.InboundEvents.UserNameUpdateEvent
+import com.sumologic.killerqueen.model.OutboundEvents
 import com.sumologic.killerqueen.state.StateMachine
 import spray.json.DefaultJsonProtocol._
 
@@ -141,7 +142,7 @@ object Main extends App with Logging {
 
     info("Attempt to start connection to cabinet done.  Waiting.")
 
-    ws ! TextMessage.Strict("![k[connect],v[{\"name\":\"1\",\"isGameMachine\":false}]]!")
+    ws ! TextMessage.Strict(OutboundEvents.ConnectEvent("1", false).toApi)
   }
 
   private def startLoggingClock(machine: StateMachine): Unit = {
