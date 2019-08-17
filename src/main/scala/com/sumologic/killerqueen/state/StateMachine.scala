@@ -368,7 +368,12 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
    */
   private[this] def updateSnailState(event: GameplayEvent): Option[EnrichedEvent] = {
     def recordSnailAt(newX: Int, player: Player): Unit = {
-      player.distanceTraveledOnSnail += Math.abs(gameState.lastKnownSnailPosition - newX)
+      // There's a bug where snail can move backwards 1px.  So we can't use abs, and instead have to calculate direction ourselves
+      if (player.team == XYConstants.LeftTeam) {
+        player.distanceTraveledOnSnail += gameState.lastKnownSnailPosition - newX
+      } else {
+        player.distanceTraveledOnSnail += newX - gameState.lastKnownSnailPosition
+      }
       gameState.lastKnownSnailPosition = newX
     }
 

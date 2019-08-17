@@ -591,10 +591,8 @@ class StateMachineTest extends TestBase with BeforeAndAfterEach with Logging {
     Player(1).distanceTraveledOnSnail should be(0)
     Player(2).distanceTraveledOnSnail should be(0)
 
-    sut.gameState.playerList.foreach {
-      player =>
-        player.distanceTraveledOnSnail should be >= 0
-    }
+    // NOTE: We used to have a "all players distance > 0" here, but it turns out you can move the snail back in some
+    // cases, so that was an invalid check.  (For example, old builds let you bump snail backwards.)
 
     // If win by snail, teams total should be exactly the same as the expected distance
     // TODO: This won't be right on snail bonus game, so ignoring that case for now
@@ -621,7 +619,6 @@ class StateMachineTest extends TestBase with BeforeAndAfterEach with Logging {
           player.foodDeposited should be(0)
       }
     }
-
   }
 
   private[this] var sut: StateMachine = _
