@@ -48,21 +48,12 @@ class StateMachineTest extends TestBase with BeforeAndAfterEach with Logging {
         sut.processEvent(GameEndEvent("map_dusk", false, 20.07644, false))
         sut.processEvent(VictoryEvent("Gold", "military"))
 
-        sut.gameState.gameType should be(GameType.MilitaryBonusGame)
-      }
-
-      "less than ten players are spawned at the start" in {
-        sut.processEvent(SpawnEvent(Player(1), false))
-        sut.processEvent(SpawnEvent(Player(2), false))
-        sut.processEvent(PlayerNamesEvent)
-        sut.processEvent(GameStartEvent("map_dusk", false, 0, false))
-
-        sut.gameState.gameType should be(GameType.MilitaryBonusGame)
-
         // Check for spawning as fast warrior after bonus game is detected
         sut.processEvent(SpawnEvent(Player(3), false))
         Player(3).currentState.isWarrior should be(true)
         Player(3).currentState.isFast should be(true)
+
+        sut.gameState.gameType should be(GameType.MilitaryBonusGame)
       }
 
       "an unexpected soldier kills someone" in {

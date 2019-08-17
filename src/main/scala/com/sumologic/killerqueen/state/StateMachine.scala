@@ -151,9 +151,9 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
         }
 
         if (gameState.playerList.length < 10) {
-          // Bonus game can start without all ten people
-          // TODO: This could be snail game...
-          markAsMilitaryBonusGame()
+          // Bonus game can start without all ten people.  But we don't know if it's snail or military.
+          gameState.ensureNot(GameType.RegularGame)
+          gameState.ensureNot(GameType.DemoGame)
         }
 
       case VictoryEvent(team, tpe) =>
