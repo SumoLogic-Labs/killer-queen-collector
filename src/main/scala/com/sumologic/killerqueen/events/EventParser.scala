@@ -28,6 +28,7 @@ object EventParser {
   // Berrys
   private val BerryDeposit = createRegex("berryDeposit", "(\\d+),(\\d+),(\\d+)") // ![k[berryDeposit],v[884,990,4]]!
   private val BerryKickIn = createRegex("berryKickIn", "(\\d+),(\\d+),(\\d+)") // ![k[berryKickIn],v[804,645,2]]!
+  private val BerryKickIn2 = createRegex("berryKickIn", "(\\d+),(\\d+),(\\d+)(True|False)") // ![k[berryKickIn],v[804,645,2True]]!
   private val CarryFood = createRegex("carryFood", "(\\d+)") // ![k[carryFood],v[10]]!
 
   // Maidens / gates
@@ -65,7 +66,8 @@ object EventParser {
       case UserNameUpdate(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10) => UserNameUpdateEvent(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
 
       case BerryDeposit(x, y, playerId) => BerryDepositEvent(x.toInt, y.toInt, Player(playerId.toInt))
-      case BerryKickIn(x, y, playerId) => BerryKickInEvent(x.toInt, y.toInt, Player(playerId.toInt))
+      case BerryKickIn(x, y, playerId) => BerryKickInEvent(x.toInt, y.toInt, Player(playerId.toInt), None)
+      case BerryKickIn2(x, y, playerId, ownTeam) => BerryKickInEvent(x.toInt, y.toInt, Player(playerId.toInt), Some(ownTeam.toBoolean))
       case CarryFood(playerId) => CarryFoodEvent(Player(playerId.toInt))
 
       case BlessMaiden(x, y, team) =>

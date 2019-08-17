@@ -24,7 +24,8 @@ class EventParserTest extends TestBase {
       parseAndRecord("![k[userNameUpdate],v[Rambo,,Chris,,,,,,,]]!") should be(UserNameUpdateEvent("Rambo", "", "Chris", "", "", "", "", "", "", ""))
 
       parseAndRecord("![k[berryDeposit],v[884,990,4]]!") should be(BerryDepositEvent(884, 990, Player(4)))
-      parseAndRecord("![k[berryKickIn],v[804,645,2]]!") should be(BerryKickInEvent(804, 645, Player(2)))
+      parseAndRecord("![k[berryKickIn],v[804,645,2]]!") should be(BerryKickInEvent(804, 645, Player(2), None))
+      parseAndRecord("![k[berryKickIn],v[804,645,2True]]!") should be(BerryKickInEvent(804, 645, Player(2), Some(true)))
       parseAndRecord("![k[carryFood],v[10]]!") should be(CarryFoodEvent(Player(10)))
 
       parseAndRecord("![k[blessMaiden],v[1360,260,Blue]]!") should be(BlessMaidenEvent(1360, 260, "Blue"))

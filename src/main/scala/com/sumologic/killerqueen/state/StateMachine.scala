@@ -330,7 +330,8 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
         return Some(PlayerStateEnrichedEvent(player.currentState, e))
 
-      case e@BerryKickInEvent(x, _, player) =>
+      case e@BerryKickInEvent(x, _, player, ownTeamOption) =>
+        // TODO: Check if ownTeamOption above matches my calculations, otherwise adjust team side?
         if (XYConstants.teamSideFromXCoordinate(x) == player.team) {
           player.foodKickedInForMyTeam += 1
         } else {

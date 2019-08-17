@@ -112,11 +112,13 @@ object InboundEvents {
     * @param x
     * @param y
     * @param player
+    * @param ownTeam Not defined on older builds.
     */
   case class BerryKickInEvent(x: Int,
                               y: Int,
-                              player: Player)
-    extends GameplayEvent("berryKickIn", s"$x,$y,${player.id}")
+                              player: Player,
+                              ownTeam: Option[Boolean])
+    extends GameplayEvent("berryKickIn", s"$x,$y,${player.id}${ownTeam.map(_.toString).getOrElse("").capitalize}")
 
   /**
     * Player picked up a piece of food.
