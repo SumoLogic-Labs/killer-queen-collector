@@ -20,7 +20,7 @@ class GameState {
   var inProgress = false
   private var _gameType: Option[GameType.GameType] = None
 
-  def gameType: Option[GameType.GameType] = _gameType
+  def gameType: GameType.GameType = _gameType.getOrElse(GameType.UnknownGame)
 
   def gameType_=(newValue: GameType.GameType): Unit = {
     if (_gameType.forall(_ == newValue)) {
@@ -53,8 +53,8 @@ class GameState {
 
   def toFinalGameState: FinalGameState = {
     val queenLives = gameType match {
-      case Some(GameType.SnailBonusGame) => 5
-      case Some(GameType.MilitaryBonusGame) => 2
+      case GameType.SnailBonusGame => 5
+      case GameType.MilitaryBonusGame => 2
       case _ => 3
     }
 
@@ -200,6 +200,8 @@ case class FinalGameState(id: Long,
 
 object GameType extends Enumeration {
   type GameType = Value
+
+  val UnknownGame = Value("unknown")
   val DemoGame = Value("demo")
   val RegularGame = Value("regular")
   val MilitaryBonusGame = Value("bonus_military")
