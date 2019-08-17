@@ -22,6 +22,7 @@ class RawMessageRecorder(file: File) extends Logging {
         synchronized {
           fw.write(message)
           fw.write("\n")
+          fw.flush()
         }
       } finally {
         fw.close()
