@@ -412,7 +412,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
   private[this] def updateOtherStats(event: GameplayEvent): Option[EnrichedEvent] = {
     event match {
-      case e@GlanceEvent(player1, player2) =>
+      case e@GlanceEvent(_, _, player1, player2) =>
         return Some(EnrichedGlanceEvent(player1.currentState, player2.currentState, e))
 
       case _ =>

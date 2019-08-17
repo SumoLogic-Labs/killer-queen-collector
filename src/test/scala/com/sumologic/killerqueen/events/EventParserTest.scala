@@ -38,7 +38,8 @@ class EventParserTest extends TestBase {
       parseAndRecord("![k[snailEat],v[1081,11,7,10]]!") should be(SnailEatEvent(1081, 11, Player(7), Player(10)))
       parseAndRecord("![k[snailEscape],v[1131,11,10]]!") should be(SnailEscapeEvent(1131, 11, Player(10)))
 
-      parseAndRecord("![k[glance],v[1,2]]!") should be(GlanceEvent(Player(1), Player(2)))
+      parseAndRecord("![k[glance],v[1,2]]!") should be(GlanceEvent(None, None, Player(1), Player(2)))
+      parseAndRecord("![k[glance],v[1229,294,1,2]]!") should be(GlanceEvent(Some(1229), Some(294), Player(1), Player(2)))
       parseAndRecord("![k[playerKill],v[1006,20,10,5,Worker]]!") should be(PlayerKillEvent(1006, 20, Player(10), Player(5), "Worker"))
       parseAndRecord("![k[playernames],v[,,,,,,,,,]]!") should be(PlayerNamesEvent)
       parseAndRecord("![k[spawn],v[1,False]]!") should be(SpawnEvent(Player(1), false))

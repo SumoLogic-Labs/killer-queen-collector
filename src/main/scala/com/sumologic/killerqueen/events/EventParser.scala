@@ -44,6 +44,7 @@ object EventParser {
 
   // Players
   private val Glance = createRegex("glance", "(\\d+),(\\d+)") // ![k[glance],v[1,2]]!
+  private val Glance2 = createRegex("glance", "(\\d+),(\\d+),(\\d+),(\\d+)") // ![k[glance],v[1229,294,1,2]]!
   private val PlayerKill = createRegex("playerKill", "(\\d+),(\\d+),(\\d+),(\\d+),(\\w+)") // ![k[playerKill],v[1006,20,10,5,Worker]]!
   private val PlayerNames = createRegex("playernames", ",,,,,,,,,") // ![k[playernames],v[,,,,,,,,,]]!
   private val Spawn = createRegex("spawn", "(\\d+),(\\w+)") // ![k[spawn],v[1,False]]!
@@ -79,7 +80,8 @@ object EventParser {
       case SnailEat(x, y, killerId, victimId) => SnailEatEvent(x.toInt, y.toInt, Player(killerId.toInt), Player(victimId.toInt))
       case SnailEscape(x, y, playerId) => SnailEscapeEvent(x.toInt, y.toInt, Player(playerId.toInt))
 
-      case Glance(playerId1, playerId2) => GlanceEvent(Player(playerId1.toInt), Player(playerId2.toInt))
+      case Glance(playerId1, playerId2) => GlanceEvent(None, None, Player(playerId1.toInt), Player(playerId2.toInt))
+      case Glance2(x, y, playerId1, playerId2) => GlanceEvent(Some(x.toInt), Some(y.toInt), Player(playerId1.toInt), Player(playerId2.toInt))
       case PlayerKill(x, y, killerId, victimId, victimType) => PlayerKillEvent(x.toInt, y.toInt, Player(killerId.toInt), Player(victimId.toInt), victimType)
       case PlayerNames() => PlayerNamesEvent
       case Spawn(playerId, isBot) => SpawnEvent(Player(playerId.toInt), isBot.toBoolean)

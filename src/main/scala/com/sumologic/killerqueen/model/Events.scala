@@ -235,12 +235,25 @@ object InboundEvents {
   /**
     * `player` glanced (ran into) `player2`.  (In the event of simultaneous/equal force, it appears to be randomly selected.)
     *
+    * @param x Not defined on older builds.
+    * @param y Not defined on older builds.
     * @param player1
     * @param player2
     */
-  case class GlanceEvent(player1: Player,
+  case class GlanceEvent(x: Option[Int],
+                         y: Option[Int],
+                         player1: Player,
                          player2: Player)
-    extends GameplayEvent("glance", s"${player1.id},${player2.id}")
+    extends GameplayEvent("glance", s"${x.getOrElse(0)},${y.getOrElse(0)},${player1.id},${player2.id}") {
+
+    override def toApi: String = {
+      if(x.isEmpty || y.isEmpty) {
+        buildApiString("glance", s"${player1.id},${player2.id}")
+      } else {
+        buildApiString("glance", rawValue)
+      }
+    }
+  }
 
   // Worker, Soldier, and Queen are valid victimType
   /**
