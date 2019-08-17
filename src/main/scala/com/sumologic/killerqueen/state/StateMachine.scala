@@ -9,13 +9,13 @@ import com.sumologic.killerqueen.model._
 import scala.collection.mutable
 
 /**
-  * A [[StateMachine]] processes all [[GameplayEvent]]s and tracks the current [[GameState]] and [[PlayerState]] for all
-  * players.  It includes logic to detect "demo games", which are the games being shown when the KQ machine is idle.  Also,
-  * using other heuristics, it can detect if we're playing a bonus game.  (However, until a heuristic matches, it may
-  * incorrectly detect that we're in a regular game.)
-  *
-  * @param exitOnTest Call System.exit() on failure.  Useful to forcefully crash a UT on exception.  (May be better options to consider.)
-  */
+ * A [[StateMachine]] processes all [[GameplayEvent]]s and tracks the current [[GameState]] and [[PlayerState]] for all
+ * players.  It includes logic to detect "demo games", which are the games being shown when the KQ machine is idle.  Also,
+ * using other heuristics, it can detect if we're playing a bonus game.  (However, until a heuristic matches, it may
+ * incorrectly detect that we're in a regular game.)
+ *
+ * @param exitOnTest Call System.exit() on failure.  Useful to forcefully crash a UT on exception.  (May be better options to consider.)
+ */
 class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
   // VisibleForTesting - used to make sure certain events are happening
@@ -44,10 +44,10 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
       var enrichedEventToLog: Option[EnrichedEvent] = None
 
       /**
-        * Sometimes we want to log an additional [[EnrichedEvent]].  This utility method keeps track of the ones to log.
-        * We have a hard constraint on only logging one [[EnrichedEvent]] per normal [[Event]].  The reasoning is that
-        * only one place truly owns an [[Event]], and thus only one place should record the [[EnrichedEvent]].
-        */
+       * Sometimes we want to log an additional [[EnrichedEvent]].  This utility method keeps track of the ones to log.
+       * We have a hard constraint on only logging one [[EnrichedEvent]] per normal [[Event]].  The reasoning is that
+       * only one place truly owns an [[Event]], and thus only one place should record the [[EnrichedEvent]].
+       */
       def possiblyLog(newConsideration: Option[EnrichedEvent]): Unit = {
         if (newConsideration.isDefined) {
           if (enrichedEventToLog.isDefined) {
@@ -69,6 +69,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
           error(e, s"Exception when processing $event.  Current state is ${gameState.toFinalGameState} and playerMap is ${gameState.playerMap} and events to this point are ${allEvents.mkString(", ")}")
           exceptionFound = true
           if (exitOnTest) {
+            warn(s"Exiting because exitOnTest=$exitOnTest")
             System.exit(1)
           }
       }
@@ -99,8 +100,8 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
   private[this] val Player1 = Player(1)
 
   /**
-    * Game control state involves things such as game start/end, isDemoGame, and isBonusGame.
-    */
+   * Game control state involves things such as game start/end, isDemoGame, and isBonusGame.
+   */
   private[this] def updateGameControlState(event: GameplayEvent): Option[EnrichedEvent] = {
     def logQueuedEvents(): Unit = {
       logQueue.foreach(logEvent)
@@ -108,66 +109,77 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
     }
 
     def markAsRegularGame(): Unit = {
-      if (gameState.isDemoGame.isEmpty || gameState.isBonusGame.isEmpty) {
-        debug(s"Determined it is a regular game.  Dumping ${logQueue.size} logs now.  Triggered by $event")
-        gameState.isDemoGame = false
-        gameState.isBonusGame = false
-        logQueuedEvents()
+      debug(s"Determined it is a regular game.  Dumping ${logQueue.size} logs now.  Triggered by $event")
+      gameState.gameType = GameType.RegularGame
+      logQueuedEvents()
+    }
+
+    def markAsMilitaryBonusGame(): Unit = {
+      debug(s"Determined it is a military bonus game.  Triggered by $event")
+      gameState.gameType = GameType.MilitaryBonusGame
+      logQueuedEvents()
+      gameState.playerList.foreach {
+        playerState =>
+          if (playerState.totalDeaths == 0) {
+            playerState.currentState.isFast = true
+            playerState.currentState.isWarrior = !playerState.isQueen
+          }
       }
     }
 
-    def markAsBonusGame(): Unit = {
-      if (gameState.isBonusGame.isEmpty) {
-        debug(s"Determined it is a bonus game.  Triggered by $event")
-        gameState.isBonusGame = true
-        gameState.isDemoGame = false
-        logQueuedEvents()
-        gameState.playerList.foreach {
-          playerState =>
-            if (playerState.totalDeaths == 0) {
-              playerState.currentState.isFast = true
-              playerState.currentState.isWarrior = !playerState.isQueen
-            }
-        }
+    def markAsSnailBonusGame(): Unit = {
+      debug(s"Determined it is a snail bonus game.  Triggered by $event")
+      gameState.gameType = GameType.SnailBonusGame
+      logQueuedEvents()
+      gameState.playerList.foreach {
+        playerState =>
+          if (playerState.totalDeaths == 0 && playerState.isQueen) {
+            playerState.currentState.isFast = true
+          }
       }
     }
 
     def markAsDemoGame(): Unit = {
-      if (gameState.isDemoGame.isEmpty) {
-        debug(s"Determined it is a demo game.  Triggered by $event")
-        gameState.isBonusGame = false
-        gameState.isDemoGame = true
-        logQueue.clear()
-      }
+      debug(s"Determined it is a demo game.  Triggered by $event")
+      gameState.gameType = GameType.DemoGame
+      logQueue.clear()
     }
 
     event match {
       case GameEndEvent(_, _, duration, _) =>
         gameState.inProgress = false
         gameState.duration = Some(duration)
-        gameState.isDemoGame = false // No end event for demo games
+        gameState.ensureNot(GameType.DemoGame) // No end event for demo games
 
-      case GameStartEvent(map, _, _, _) =>
+      case GameStartEvent(map, goldOnLeft, _, _) =>
         gameState.map = Some(map)
         gameState.inProgress = true
         gameState.startTime = System.currentTimeMillis()
-        gameState.isDemoGame = false // No start event for demo games
+        gameState.ensureNot(GameType.DemoGame) // No start event for demo games
+
+        if (goldOnLeft) {
+          XYConstants.LeftTeam = "Gold"
+          XYConstants.RightTeam = "Blue"
+        }
 
         if (gameState.playerList.length < 10) {
-          // Bonus game can start without all ten people
-          markAsBonusGame()
+          // Bonus game can start without all ten people.  But we don't know if it's snail or military.
+          gameState.ensureNot(GameType.RegularGame)
+          gameState.ensureNot(GameType.DemoGame)
         }
 
       case VictoryEvent(team, tpe) =>
         gameState.victor = Some(team)
         gameState.winType = Some(tpe)
 
-        gameState.isDemoGame = false // No victory event for demo games
+        gameState.ensureNot(GameType.DemoGame) // No victory event for demo games
 
-        if (tpe == "economic" && gameState.isBonusGame.contains(true)) {
+        if (tpe == "economic" && (gameState.gameType == GameType.MilitaryBonusGame || gameState.gameType == GameType.SnailBonusGame)) {
           throw new Exception("Invariant failed:  Economic victory in a bonus game")
         } else if (tpe == "military" && Player(1).totalDeaths <= 2 && Player(2).totalDeaths <= 2) {
-          markAsBonusGame()
+          markAsMilitaryBonusGame()
+        } else if (Player(1).totalDeaths > 3 || Player(2).totalDeaths > 3) {
+          markAsSnailBonusGame()
         }
 
         gamesPlayed += 1
@@ -196,32 +208,42 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
       case CarryFoodEvent(player) if player.totalDeaths == 0 =>
         // In a bonus game, you can't carry food unless you died
-        gameState.isBonusGame = false
+        gameState.ensureNot(GameType.MilitaryBonusGame)
 
       case BlessMaidenEvent(_, 20, _) =>
-        // The only game mode with a maiden at this position is the bonus game
-        markAsBonusGame()
+        // The only game mode with a maiden at this position is the bonus game, but it can be snail or military...
+        gameState.ensureNot(GameType.RegularGame)
+        gameState.ensureNot(GameType.DemoGame)
 
       case _: ReserveMaidenEvent | _: UnreserveMaidenEvent | _: UseMaidenEvent =>
         // These are all events that don't happen in demo game
-        gameState.isDemoGame = false
+        gameState.ensureNot(GameType.DemoGame)
 
       case PlayerKillEvent(_, _, killer, victim, victimType) =>
-        gameState.isDemoGame = false // Doesn't happen in demo game either
-
         // If the game reports a Soldier or Queen died, but we didn't think they're a warrior, then bonus game
-        if (!victim.currentState.isWarrior && !victim.isQueen && (victimType == "Soldier" || victimType == "Queen")) {
-          markAsBonusGame()
+        // One bonus script includes a warrior who didn't get upgraded, so if it's snot demo, then this is what we want
+        if (!victim.currentState.isWarrior && !victim.isQueen && (victimType == "Soldier" || victimType == "Queen")
+          && gameState.gameType != GameType.DemoGame) {
+            markAsMilitaryBonusGame()
+
         }
 
         // If you're not a warrior AND not on the snail AND not queen, and killed someone, then bonus game)
-        if (!killer.isQueen && !killer.currentState.isWarrior && !killer.currentState.isOnSnail) {
-          markAsBonusGame()
+        // One bonus script includes a warrior who didn't get upgraded, so if it's snot demo, then this is what we want
+        if (!killer.isQueen && !killer.currentState.isWarrior && !killer.currentState.isOnSnail
+          && gameState.gameType != GameType.DemoGame) {
+          markAsMilitaryBonusGame()
+        }
+
+        if (victim.isQueen && victim.totalDeaths == 3) {
+          // You died again after 3 deaths?  Well, clearly snail bonus.
+          markAsSnailBonusGame()
         }
 
       case _: BerryDepositEvent | _: BerryKickInEvent =>
         // You can't score berries in the bonus game
-        gameState.isBonusGame = false
+        gameState.ensureNot(GameType.MilitaryBonusGame)
+        gameState.ensureNot(GameType.SnailBonusGame)
 
       case _ =>
     }
@@ -230,8 +252,8 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
   }
 
   /**
-    * Player state involves the primary mutations to [[PlayerState]].
-    */
+   * Player state involves the primary mutations to [[PlayerState]].
+   */
   private[this] def updatePlayerState(event: GameplayEvent): Option[EnrichedEvent] = {
     event match {
       case e@UseMaidenEvent(_, _, tpe, player) =>
@@ -252,10 +274,10 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
         killer.totalKills += 1
 
         if (victim.isQueen) {
-          val maxQueenLives = if (gameState.isBonusGame.contains(true)) {
-            2
-          } else {
-            3
+          val maxQueenLives = gameState.gameType match {
+            case GameType.SnailBonusGame => 5
+            case GameType.MilitaryBonusGame => 2
+            case _ => 3
           }
 
           if (victim.totalDeaths < maxQueenLives) {
@@ -265,7 +287,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
           victim.totalLives += 1
         }
 
-        val deathLocation: String = if (gameState.isBonusGame.contains(true)) {
+        val deathLocation: String = if (gameState.gameType == GameType.MilitaryBonusGame || gameState.gameType == GameType.SnailBonusGame) {
           XYConstants.locationForXYOnMap(x, y, XYConstants.BonusGameMap)
         } else {
           XYConstants.locationForXYOnMap(x, y, gameState.map.getOrElse("unknown"))
@@ -284,7 +306,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
         gameState.playerMap.put(player.id, state)
         gameState.playerList.append(state)
 
-        if (gameState.isBonusGame.contains(true)) {
+        if (gameState.gameType == GameType.MilitaryBonusGame) {
           // We're ok to use ternary here.  We promote stats whenever we detect a bonus game as well
           player.currentState.isFast = true
           player.currentState.isWarrior = !player.isQueen
@@ -313,15 +335,15 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
   }
 
   /**
-    * Tracking berries, including those scored, happens here.
-    */
+   * Tracking berries, including those scored, happens here.
+   */
   private[this] def updateBerryState(event: GameplayEvent): Option[EnrichedEvent] = {
     event match {
       case e@BerryDepositEvent(x, _, player) =>
         player.currentState.hasFood = false
         player.foodDeposited += 1
 
-        if (gameState.isDemoGame.contains(false) && player.team != XYConstants.teamSideFromXCoordinate(x)) {
+        if (gameState.gameType != GameType.DemoGame && player.team != XYConstants.teamSideFromXCoordinate(x)) {
           info(s"Swapping team sides.  $player deposited a barry at coordinate $x, which belongs to the other team")
           val newRightTeam = XYConstants.LeftTeam
           XYConstants.LeftTeam = XYConstants.RightTeam
@@ -330,7 +352,8 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
         return Some(PlayerStateEnrichedEvent(player.currentState, e))
 
-      case e@BerryKickInEvent(x, _, player) =>
+      case e@BerryKickInEvent(x, _, player, ownTeamOption) =>
+        // TODO: Check if ownTeamOption above matches my calculations, otherwise adjust team side?
         if (XYConstants.teamSideFromXCoordinate(x) == player.team) {
           player.foodKickedInForMyTeam += 1
         } else {
@@ -360,11 +383,16 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
   }
 
   /**
-    * Sometimes these descriptors get redundant.
-    */
+   * Sometimes these descriptors get redundant.
+   */
   private[this] def updateSnailState(event: GameplayEvent): Option[EnrichedEvent] = {
     def recordSnailAt(newX: Int, player: Player): Unit = {
-      player.distanceTraveledOnSnail += Math.abs(gameState.lastKnownSnailPosition - newX)
+      // There's a bug where snail can move backwards 1px.  So we can't use abs, and instead have to calculate direction ourselves
+      if (player.team == XYConstants.LeftTeam) {
+        player.distanceTraveledOnSnail += gameState.lastKnownSnailPosition - newX
+      } else {
+        player.distanceTraveledOnSnail += newX - gameState.lastKnownSnailPosition
+      }
       gameState.lastKnownSnailPosition = newX
     }
 
@@ -412,7 +440,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
   private[this] def updateOtherStats(event: GameplayEvent): Option[EnrichedEvent] = {
     event match {
-      case e@GlanceEvent(player1, player2) =>
+      case e@GlanceEvent(_, _, player1, player2) =>
         return Some(EnrichedGlanceEvent(player1.currentState, player2.currentState, e))
 
       case _ =>
@@ -424,9 +452,9 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
   private[this] def logEvent(event: Event): Unit = {
     allEvents.append(event)
 
-    if (gameState.isDemoGame.contains(false)) {
+    if (gameState.gameType != GameType.DemoGame) {
       info(eventSerializer.toJson(event))
-    } else if (gameState.isDemoGame.isEmpty) {
+    } else if (gameState.gameType == GameType.UnknownGame) {
       // Queue up the events to be recorded later.  We'll know quickly if this is a demo game or not
       logQueue.append(event)
     }

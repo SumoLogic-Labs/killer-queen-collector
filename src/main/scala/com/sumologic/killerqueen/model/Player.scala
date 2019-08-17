@@ -1,8 +1,8 @@
 package com.sumologic.killerqueen.model
 
 /**
-  * Represents the literal player position.  See [[com.sumologic.killerqueen.state.PlayerState]] for more active information
-  */
+ * Represents the literal player position.  See [[com.sumologic.killerqueen.state.PlayerState]] for more active information
+ */
 case class Player(id: Int, name: String) {
   val team = Player.colors((id - 1) % 2)
 

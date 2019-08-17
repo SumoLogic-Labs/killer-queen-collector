@@ -3,13 +3,13 @@ package com.sumologic.killerqueen.state
 import com.sumologic.killerqueen.model.{Event, Player}
 
 /**
-  * [[PlayerState]] tracks all information related to a current [[Player]].  It is primarily focused on stats collection
-  *
-  * NOTE: Often there are more than 10 player states at the end of the game.  Bots are considered distinct from humans.
-  *
-  * @param player
-  * @param isBot
-  */
+ * [[PlayerState]] tracks all information related to a current [[Player]].  It is primarily focused on stats collection
+ *
+ * NOTE: Often there are more than 10 player states at the end of the game.  Bots are considered distinct from humans.
+ *
+ * @param player
+ * @param isBot
+ */
 class PlayerState(player: Player, isBot: Boolean) {
   val id: Int = player.id
   val isQueen: Boolean = player.isQueen
@@ -84,24 +84,24 @@ object PlayerState {
 
 
 /**
-  * Built from [[PlayerState]], this is used to create the JSON event
-  *
-  * @param id            1-10 - from [[Player]]
-  * @param name          name of position - from [[Player]]
-  * @param userName      Configured name for player (if UI is used.)  "Bot $id" or "Player $id" if not set
-  * @param team          `Gold` or `Blue`
-  * @param foodDeposited Number of berries manually scored (always 0 for a queen)
-  * @param foodKickedInForMyTeam
-  * @param foodKickedInForOtherTeam
-  * @param lives         Number of lives used during game.  (Usually deaths + 1, except for military victories for queens)
-  * @param deaths
-  * @param kills
-  * @param snailEscapes  Escapes from being eaten by snail
-  * @param movedSnailDistance
-  * @param botAtEndOfGame
-  * @param warriorAtEndOfGame
-  * @param fastAtEndOfGame
-  */
+ * Built from [[PlayerState]], this is used to create the JSON event
+ *
+ * @param id            1-10 - from [[Player]]
+ * @param name          name of position - from [[Player]]
+ * @param userName      Configured name for player (if UI is used.)  "Bot $id" or "Player $id" if not set
+ * @param team          `Gold` or `Blue`
+ * @param foodDeposited Number of berries manually scored (always 0 for a queen)
+ * @param foodKickedInForMyTeam
+ * @param foodKickedInForOtherTeam
+ * @param lives         Number of lives used during game.  (Usually deaths + 1, except for military victories for queens)
+ * @param deaths
+ * @param kills
+ * @param snailEscapes  Escapes from being eaten by snail
+ * @param movedSnailDistance
+ * @param botAtEndOfGame
+ * @param warriorAtEndOfGame
+ * @param fastAtEndOfGame
+ */
 case class FinalPlayerState(id: Int,
 
                             name: String,

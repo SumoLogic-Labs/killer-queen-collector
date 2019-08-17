@@ -5,12 +5,12 @@ import com.sumologic.killerqueen.model.{InboundEvent, Player}
 import scala.util.matching.Regex
 
 /**
-  * Turns the KQ wire events into Scala objects that we can manipulate.
-  *
-  * See:
-  * - https://www.reddit.com/r/KillerQueen/comments/82tbug/feature_request_stats/dzghx0t
-  * - https://github.com/killer-queen-stats/kqstats/wiki/Socket-Messages
-  */
+ * Turns the KQ wire events into Scala objects that we can manipulate.
+ *
+ * See:
+ * - https://www.reddit.com/r/KillerQueen/comments/82tbug/feature_request_stats/dzghx0t
+ * - https://github.com/killer-queen-stats/kqstats/wiki/Socket-Messages
+ */
 object EventParser {
 
   private[this] def createRegex(key: String, valueRegex: String): Regex = {
@@ -28,6 +28,7 @@ object EventParser {
   // Berrys
   private val BerryDeposit = createRegex("berryDeposit", "(\\d+),(\\d+),(\\d+)") // ![k[berryDeposit],v[884,990,4]]!
   private val BerryKickIn = createRegex("berryKickIn", "(\\d+),(\\d+),(\\d+)") // ![k[berryKickIn],v[804,645,2]]!
+  private val BerryKickIn2 = createRegex("berryKickIn", "(\\d+),(\\d+),(\\d+)(True|False)") // ![k[berryKickIn],v[804,645,2True]]!
   private val CarryFood = createRegex("carryFood", "(\\d+)") // ![k[carryFood],v[10]]!
 
   // Maidens / gates
@@ -44,6 +45,7 @@ object EventParser {
 
   // Players
   private val Glance = createRegex("glance", "(\\d+),(\\d+)") // ![k[glance],v[1,2]]!
+  private val Glance2 = createRegex("glance", "(\\d+),(\\d+),(\\d+),(\\d+)") // ![k[glance],v[1229,294,1,2]]!
   private val PlayerKill = createRegex("playerKill", "(\\d+),(\\d+),(\\d+),(\\d+),(\\w+)") // ![k[playerKill],v[1006,20,10,5,Worker]]!
   private val PlayerNames = createRegex("playernames", ",,,,,,,,,") // ![k[playernames],v[,,,,,,,,,]]!
   private val Spawn = createRegex("spawn", "(\\d+),(\\w+)") // ![k[spawn],v[1,False]]!
@@ -64,7 +66,8 @@ object EventParser {
       case UserNameUpdate(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10) => UserNameUpdateEvent(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
 
       case BerryDeposit(x, y, playerId) => BerryDepositEvent(x.toInt, y.toInt, Player(playerId.toInt))
-      case BerryKickIn(x, y, playerId) => BerryKickInEvent(x.toInt, y.toInt, Player(playerId.toInt))
+      case BerryKickIn(x, y, playerId) => BerryKickInEvent(x.toInt, y.toInt, Player(playerId.toInt), None)
+      case BerryKickIn2(x, y, playerId, ownTeam) => BerryKickInEvent(x.toInt, y.toInt, Player(playerId.toInt), Some(ownTeam.toBoolean))
       case CarryFood(playerId) => CarryFoodEvent(Player(playerId.toInt))
 
       case BlessMaiden(x, y, team) =>
@@ -79,7 +82,8 @@ object EventParser {
       case SnailEat(x, y, killerId, victimId) => SnailEatEvent(x.toInt, y.toInt, Player(killerId.toInt), Player(victimId.toInt))
       case SnailEscape(x, y, playerId) => SnailEscapeEvent(x.toInt, y.toInt, Player(playerId.toInt))
 
-      case Glance(playerId1, playerId2) => GlanceEvent(Player(playerId1.toInt), Player(playerId2.toInt))
+      case Glance(playerId1, playerId2) => GlanceEvent(None, None, Player(playerId1.toInt), Player(playerId2.toInt))
+      case Glance2(x, y, playerId1, playerId2) => GlanceEvent(Some(x.toInt), Some(y.toInt), Player(playerId1.toInt), Player(playerId2.toInt))
       case PlayerKill(x, y, killerId, victimId, victimType) => PlayerKillEvent(x.toInt, y.toInt, Player(killerId.toInt), Player(victimId.toInt), victimType)
       case PlayerNames() => PlayerNamesEvent
       case Spawn(playerId, isBot) => SpawnEvent(Player(playerId.toInt), isBot.toBoolean)

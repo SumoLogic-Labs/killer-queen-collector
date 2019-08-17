@@ -18,7 +18,7 @@ class EventHandlerTest extends TestBase with MockitoSugar with BeforeAndAfterEac
     }
 
     "pass along gameplay events" in {
-      val event = GlanceEvent(Player(1), Player(2))
+      val event = GlanceEvent(None, None, Player(1), Player(2))
       sut.handle(event)
       verify(stateMachine, times(1)).processEvent(event)
     }

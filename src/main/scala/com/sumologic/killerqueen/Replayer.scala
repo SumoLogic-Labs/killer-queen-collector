@@ -6,9 +6,9 @@ import java.util.Date
 import com.sumologic.killerqueen.events.{EventHandler, EventParser, NoopEventSender}
 
 /**
-  * Replays included log files.  Very useful for getting a known data set to iterate your changes on.  At the end, it
-  * prints a time stamp that is compatible with searching in Sumo Logic.
-  */
+ * Replays included log files.  Very useful for getting a known data set to iterate your changes on.  At the end, it
+ * prints a time stamp that is compatible with searching in Sumo Logic.
+ */
 object Replayer extends App with Logging {
 
   def replayFile(file: String): Unit = {

@@ -1,8 +1,8 @@
 package com.sumologic.killerqueen.model
 
 /**
-  * Set of utilities related to parsing (X,Y) tuples into actionable pieces of information.
-  */
+ * Set of utilities related to parsing (X,Y) tuples into actionable pieces of information.
+ */
 object XYConstants {
 
   // This is configurable in console settings and not accurate at the start for all cabinets.  The StateMachine will
@@ -26,6 +26,9 @@ object XYConstants {
   // FIXME: Does not include snail bonus game.  And that'll break the API since there are 3 goals instead of 1
   val LeftGoalX: Map[String, Int] = Map(
     // FIXME: Neither goal is right on the edge, so these are approximate.  I'll need to refine these.
+    "map_concept2" -> 0, // TODO
+    "map_twilight2" -> 0, // TODO
+    "map_day_mod1" -> 20,
     "map_day" -> 20,
     "map_dusk" -> 20,
     "map_night" -> 100
@@ -34,6 +37,9 @@ object XYConstants {
   val RightGoalX: Map[String, Int] = LeftGoalX.mapValues(ScreenWidth - _)
 
   val GoalY: Map[String, Int] = Map(
+    "map_concept2" -> 11,
+    "map_twilight2" -> 611,
+    "map_day_mod1" -> 11,
     "map_day" -> 11,
     "map_dusk" -> 11,
     "map_night" -> 491
@@ -52,6 +58,11 @@ object XYConstants {
   val Regions: Map[String, Seq[XYRegion]] = Map(
     BonusGameMap -> Seq.empty,
 
+    "map_day_mod1" -> Seq(
+      XYRegion((720, 860), (940, 1080), "gold_spawn"),
+      XYRegion((980, 860), (1200, 1080), "blue_spawn")
+    ),
+
     "map_day" -> Seq(
       XYRegion((720, 860), (940, 1080), "gold_spawn"),
       XYRegion((980, 860), (1200, 1080), "blue_spawn")
@@ -66,6 +77,8 @@ object XYConstants {
       XYRegion((20, 20), (360, 240), "gold_spawn"),
       XYRegion((1560, 20), (1900, 240), "blue_spawn")
     )
+
+    // TOOD: Add twilight2 and concept2 here
   )
 
   def locationForXYOnMap(x: Int, y: Int, map: String): String = {

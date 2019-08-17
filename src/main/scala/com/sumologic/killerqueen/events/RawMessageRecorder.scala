@@ -7,10 +7,10 @@ import com.sumologic.killerqueen.Logging
 import scala.util.control.NonFatal
 
 /**
-  * Writes incoming messages to a file.
-  *
-  * @param file
-  */
+ * Writes incoming messages to a file.
+ *
+ * @param file
+ */
 class RawMessageRecorder(file: File) extends Logging {
 
   file.createNewFile() // Ensure it exists
@@ -22,6 +22,7 @@ class RawMessageRecorder(file: File) extends Logging {
         synchronized {
           fw.write(message)
           fw.write("\n")
+          fw.flush()
         }
       } finally {
         fw.close()

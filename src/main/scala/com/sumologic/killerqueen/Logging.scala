@@ -6,8 +6,8 @@ import java.util.IllegalFormatException
 import org.apache.logging.log4j.{LogManager, Logger}
 
 /**
-  * Convenience mix-in for easy logging
-  */
+ * Convenience mix-in for easy logging
+ */
 trait Logging {
 
   @transient private var _logger = null.asInstanceOf[Logger]
@@ -71,8 +71,8 @@ trait Logging {
   }
 
   /**
-    * Formats the message with any prefixes, etc.
-    */
+   * Formats the message with any prefixes, etc.
+   */
   private def format(msg: String, params: Any*): String = {
     if (params == null || params.length < 1) {
       msg
