@@ -73,16 +73,16 @@ object InboundEvents {
    * Occurs after the 3... 2... 1... countdown.  Signals that players can start interacting with each other.  Most of
    * the fields are not useful.
    *
-   * @param map      `map_day`, `map_dusk`, or `map_night`.  Will be one of these even if it's a bonus game.
-   * @param unknown1 Unknown boolean argument.  Might be `attract mode` configuration.
-   * @param duration Always 0.0
-   * @param unknown2 Unknown boolean argument.  Might be `attract mode` configuration.
+   * @param map                  `map_day`, `map_dusk`, or `map_night`.  Will be one of these even if it's a bonus game.
+   * @param goldOnLeft           Is Gold on the left cabinet/spawn?  Default is False
+   * @param duration             Always 0.0
+   * @param isAttractModeEnabled Attract mode (flashing lights, etc.) is enabled
    */
   case class GameStartEvent(map: String,
-                            unknown1: Boolean,
+                            goldOnLeft: Boolean,
                             duration: Int,
-                            unknown2: Boolean)
-    extends GameplayEvent("gamestart", s"$map,${unknown1.toString.capitalize},$duration,${unknown2.toString.capitalize}")
+                            isAttractModeEnabled: Boolean)
+    extends GameplayEvent("gamestart", s"$map,${goldOnLeft.toString.capitalize},$duration,${isAttractModeEnabled.toString.capitalize}")
 
   /**
    * Occurs after the [[GameEndEvent]] event.  Tells us who won and how they won.

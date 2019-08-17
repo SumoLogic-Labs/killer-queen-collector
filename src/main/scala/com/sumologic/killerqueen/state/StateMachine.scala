@@ -138,11 +138,16 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
         gameState.duration = Some(duration)
         gameState.ensureNot(GameType.DemoGame) // No end event for demo games
 
-      case GameStartEvent(map, _, _, _) =>
+      case GameStartEvent(map, goldOnLeft, _, _) =>
         gameState.map = Some(map)
         gameState.inProgress = true
         gameState.startTime = System.currentTimeMillis()
         gameState.ensureNot(GameType.DemoGame) // No start event for demo games
+
+        if (goldOnLeft) {
+          XYConstants.LeftTeam = "Gold"
+          XYConstants.RightTeam = "Blue"
+        }
 
         if (gameState.playerList.length < 10) {
           // Bonus game can start without all ten people
