@@ -128,7 +128,7 @@
         </executions>
         <configuration>
           <checkMultipleScalaVersions>true</checkMultipleScalaVersions>
-          <scalaCompatVersion>2,12</scalaCompatVersion>
+          <scalaCompatVersion>2,11</scalaCompatVersion>
           <failOnMultipleScalaVersions>true</failOnMultipleScalaVersions>
           <args>
             <arg>-target:jvm-1.8</arg>
