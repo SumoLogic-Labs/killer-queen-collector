@@ -113,8 +113,8 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
       logQueuedEvents()
     }
 
-    def markAsBonusGame(): Unit = {
-      debug(s"Determined it is a bonus game.  Triggered by $event")
+    def markAsMilitaryBonusGame(): Unit = {
+      debug(s"Determined it is a military bonus game.  Triggered by $event")
       gameState.gameType = GameType.MilitaryBonusGame
       logQueuedEvents()
       gameState.playerList.foreach {
@@ -151,7 +151,8 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
         if (gameState.playerList.length < 10) {
           // Bonus game can start without all ten people
-          markAsBonusGame()
+          // TODO: This could be snail game...
+          markAsMilitaryBonusGame()
         }
 
       case VictoryEvent(team, tpe) =>
@@ -163,7 +164,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
         if (tpe == "economic" && (gameState.gameType == GameType.MilitaryBonusGame || gameState.gameType == GameType.SnailBonusGame)) {
           throw new Exception("Invariant failed:  Economic victory in a bonus game")
         } else if (tpe == "military" && Player(1).totalDeaths <= 2 && Player(2).totalDeaths <= 2) {
-          markAsBonusGame()
+          markAsMilitaryBonusGame()
         }
 
         gamesPlayed += 1
@@ -196,7 +197,9 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
       case BlessMaidenEvent(_, 20, _) =>
         // The only game mode with a maiden at this position is the bonus game
-        markAsBonusGame()
+        markAsMilitaryBonusGame()
+
+        // TODO: Add maiden locations for snail bonus game
 
       case _: ReserveMaidenEvent | _: UnreserveMaidenEvent | _: UseMaidenEvent =>
         // These are all events that don't happen in demo game
@@ -207,12 +210,12 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
         // If the game reports a Soldier or Queen died, but we didn't think they're a warrior, then bonus game
         if (!victim.currentState.isWarrior && !victim.isQueen && (victimType == "Soldier" || victimType == "Queen")) {
-          markAsBonusGame()
+          markAsMilitaryBonusGame()
         }
 
         // If you're not a warrior AND not on the snail AND not queen, and killed someone, then bonus game)
         if (!killer.isQueen && !killer.currentState.isWarrior && !killer.currentState.isOnSnail) {
-          markAsBonusGame()
+          markAsMilitaryBonusGame()
         }
 
       case _: BerryDepositEvent | _: BerryKickInEvent =>
