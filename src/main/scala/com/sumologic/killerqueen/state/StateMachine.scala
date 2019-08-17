@@ -127,11 +127,9 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
     }
 
     def markAsDemoGame(): Unit = {
-      if (gameState.isDemoGame.isEmpty) {
-        debug(s"Determined it is a demo game.  Triggered by $event")
-        gameState.gameType = GameType.DemoGame
-        logQueue.clear()
-      }
+      debug(s"Determined it is a demo game.  Triggered by $event")
+      gameState.gameType = GameType.DemoGame
+      logQueue.clear()
     }
 
     event match {
@@ -315,7 +313,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
         player.currentState.hasFood = false
         player.foodDeposited += 1
 
-        if (gameState.isDemoGame.contains(false) && player.team != XYConstants.teamSideFromXCoordinate(x)) {
+        if (gameState.gameType != GameType.DemoGame && player.team != XYConstants.teamSideFromXCoordinate(x)) {
           info(s"Swapping team sides.  $player deposited a barry at coordinate $x, which belongs to the other team")
           val newRightTeam = XYConstants.LeftTeam
           XYConstants.LeftTeam = XYConstants.RightTeam
@@ -419,9 +417,9 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
   private[this] def logEvent(event: Event): Unit = {
     allEvents.append(event)
 
-    if (gameState.isDemoGame.contains(false)) {
+    if (gameState.gameType != GameType.DemoGame) {
       info(eventSerializer.toJson(event))
-    } else if (gameState.isDemoGame.isEmpty) {
+    } else if (gameState.gameType == GameType.UnknownGame) {
       // Queue up the events to be recorded later.  We'll know quickly if this is a demo game or not
       logQueue.append(event)
     }

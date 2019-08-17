@@ -36,9 +36,6 @@ class GameState {
     }
   }
 
-  // TODO: Kill isDemoGame
-  def isDemoGame: Option[Boolean] = _gameType.map(_ == GameType.DemoGame)
-
   var victor: Option[String] = None
   var winType: Option[String] = None
   var duration: Option[Double] = None
