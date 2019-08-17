@@ -1,6 +1,7 @@
 package com.sumologic.killerqueen.state
 
 import com.sumologic.killerqueen.model.{Event, XYConstants}
+import com.sumologic.killerqueen.state.GameType.GameType
 
 import scala.collection.mutable
 
@@ -17,28 +18,28 @@ class GameState {
   var map: Option[String] = None
 
   var inProgress = false
-  private var _isBonusGame: Option[Boolean] = None
-  private var _isDemoGame: Option[Boolean] = None
+  private var _gameType: Option[GameType.GameType] = None
 
-  def isBonusGame_=(newValue: Boolean): Unit = {
-    if (_isBonusGame.isEmpty || _isBonusGame.get == newValue) {
-      _isBonusGame = Some(newValue)
+  def gameType: Option[GameType.GameType] = _gameType
+
+  def gameType_=(newValue: GameType.GameType): Unit = {
+    if (_gameType.forall(_ == newValue)) {
+      _gameType = Some(newValue)
     } else {
-      throw new RuntimeException(s"Conflicting heuristics for detecting bonus game state.  Was ${_isBonusGame.get} and was told to set to $newValue")
+      throw new RuntimeException(s"Conflicting heuristics for detecting game type.  Was ${_gameType.get} and was told to set to $newValue")
     }
   }
 
-  def isBonusGame: Option[Boolean] = _isBonusGame
-
-  def isDemoGame_=(newValue: Boolean): Unit = {
-    if (_isDemoGame.isEmpty || _isDemoGame.get == newValue) {
-      _isDemoGame = Some(newValue)
-    } else {
-      throw new RuntimeException(s"Conflicting heuristics for detecting demo game state.  Was ${_isDemoGame.get} and was told to set to $newValue")
+  def ensureNot(gameType: GameType): Unit = {
+    if (_gameType.contains(gameType)) {
+      throw new RuntimeException(s"Conflicting heuristics for detecting game type.  Was ${_gameType.get} and was told to make sure it wasn't $gameType")
     }
   }
 
-  def isDemoGame: Option[Boolean] = _isDemoGame
+  // TODO: Kill isBonusGame and isDemoGame
+  def isBonusGame: Option[Boolean] = _gameType.map(_ == GameType.MilitaryBonusGame)
+
+  def isDemoGame: Option[Boolean] = _gameType.map(_ == GameType.DemoGame)
 
   var victor: Option[String] = None
   var winType: Option[String] = None
@@ -114,7 +115,7 @@ class GameState {
       victor.getOrElse("NO VICTOR"),
       winType.getOrElse("NO WIN TYPE"),
       duration.getOrElse(Double.MinValue),
-      isBonusGame.getOrElse(false),
+      _gameType.getOrElse(GameType.RegularGame),
 
       queenLives - goldQueenDeaths,
       queenLives - blueQueenDeaths,
@@ -151,7 +152,7 @@ class GameState {
  * @param victor                 `Gold` or `Blue` - winning team
  * @param winType                `military`, `economy`, `snail`, or `NO WIN TYPE` (error case only.)
  * @param duration               Duration of game in seconds ([[Double.MinValue]] if unknown)
- * @param isBonusGame
+ * @param gameType
  * @param goldQueenLivesRemaining
  * @param blueQueenLivesRemaining
  * @param goldBerriesRemaining
@@ -173,7 +174,7 @@ case class FinalGameState(id: Long,
                           victor: String,
                           winType: String,
                           duration: Double,
-                          isBonusGame: Boolean,
+                          gameType: GameType,
 
                           goldQueenLivesRemaining: Int,
                           blueQueenLivesRemaining: Int,
@@ -195,4 +196,12 @@ case class FinalGameState(id: Long,
 
                           lastKnownSnailPosition: Int) extends Event {
   val event = "finalGameState" // This is also gameState.
+}
+
+object GameType extends Enumeration {
+  type GameType = Value
+  val DemoGame = Value("demo")
+  val RegularGame = Value("regular")
+  val MilitaryBonusGame = Value("bonus_military")
+  val SnailBonusGame = Value("bonus_snail")
 }

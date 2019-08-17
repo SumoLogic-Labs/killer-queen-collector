@@ -110,8 +110,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
     def markAsRegularGame(): Unit = {
       if (gameState.isDemoGame.isEmpty || gameState.isBonusGame.isEmpty) {
         debug(s"Determined it is a regular game.  Dumping ${logQueue.size} logs now.  Triggered by $event")
-        gameState.isDemoGame = false
-        gameState.isBonusGame = false
+        gameState.gameType = GameType.RegularGame
         logQueuedEvents()
       }
     }
@@ -119,8 +118,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
     def markAsBonusGame(): Unit = {
       if (gameState.isBonusGame.isEmpty) {
         debug(s"Determined it is a bonus game.  Triggered by $event")
-        gameState.isBonusGame = true
-        gameState.isDemoGame = false
+        gameState.gameType = GameType.MilitaryBonusGame
         logQueuedEvents()
         gameState.playerList.foreach {
           playerState =>
@@ -135,8 +133,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
     def markAsDemoGame(): Unit = {
       if (gameState.isDemoGame.isEmpty) {
         debug(s"Determined it is a demo game.  Triggered by $event")
-        gameState.isBonusGame = false
-        gameState.isDemoGame = true
+        gameState.gameType = GameType.DemoGame
         logQueue.clear()
       }
     }
@@ -145,13 +142,13 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
       case GameEndEvent(_, _, duration, _) =>
         gameState.inProgress = false
         gameState.duration = Some(duration)
-        gameState.isDemoGame = false // No end event for demo games
+        gameState.ensureNot(GameType.DemoGame) // No end event for demo games
 
       case GameStartEvent(map, _, _, _) =>
         gameState.map = Some(map)
         gameState.inProgress = true
         gameState.startTime = System.currentTimeMillis()
-        gameState.isDemoGame = false // No start event for demo games
+        gameState.ensureNot(GameType.DemoGame) // No start event for demo games
 
         if (gameState.playerList.length < 10) {
           // Bonus game can start without all ten people
@@ -162,7 +159,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
         gameState.victor = Some(team)
         gameState.winType = Some(tpe)
 
-        gameState.isDemoGame = false // No victory event for demo games
+        gameState.ensureNot(GameType.DemoGame) // No victory event for demo games
 
         if (tpe == "economic" && gameState.isBonusGame.contains(true)) {
           throw new Exception("Invariant failed:  Economic victory in a bonus game")
@@ -196,7 +193,7 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
       case CarryFoodEvent(player) if player.totalDeaths == 0 =>
         // In a bonus game, you can't carry food unless you died
-        gameState.isBonusGame = false
+        gameState.ensureNot(GameType.MilitaryBonusGame)
 
       case BlessMaidenEvent(_, 20, _) =>
         // The only game mode with a maiden at this position is the bonus game
@@ -204,10 +201,10 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
       case _: ReserveMaidenEvent | _: UnreserveMaidenEvent | _: UseMaidenEvent =>
         // These are all events that don't happen in demo game
-        gameState.isDemoGame = false
+        gameState.ensureNot(GameType.DemoGame)
 
       case PlayerKillEvent(_, _, killer, victim, victimType) =>
-        gameState.isDemoGame = false // Doesn't happen in demo game either
+        gameState.ensureNot(GameType.DemoGame) // Doesn't happen in demo game either
 
         // If the game reports a Soldier or Queen died, but we didn't think they're a warrior, then bonus game
         if (!victim.currentState.isWarrior && !victim.isQueen && (victimType == "Soldier" || victimType == "Queen")) {
@@ -221,7 +218,8 @@ class StateMachine(exitOnTest: Boolean = false) extends Logging {
 
       case _: BerryDepositEvent | _: BerryKickInEvent =>
         // You can't score berries in the bonus game
-        gameState.isBonusGame = false
+        gameState.ensureNot(GameType.MilitaryBonusGame)
+        gameState.ensureNot(GameType.SnailBonusGame)
 
       case _ =>
     }
