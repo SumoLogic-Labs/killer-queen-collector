@@ -28,8 +28,8 @@ class EventHandler(eventSender: EventSender,
         stateMachine.reset(event)
         eventSender.send(AdminLoginEvent)
 
-      case LoginEvent(id) =>
-        info(s"Login succeeded")
+      case LoginEvent(success) =>
+        info(s"Login succeeded? $success")
         eventSender.send(GetConfigEvent("goldonleft")) // TODO: This doesn't actually work, despite suggestions that it does.  Needs further investigation.
         eventSender.send(GetConfigEvent("tournamentstatus")) // Proof that this GetConfigEvent works
 

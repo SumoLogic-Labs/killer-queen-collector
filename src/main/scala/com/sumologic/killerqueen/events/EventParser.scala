@@ -24,7 +24,7 @@ object EventParser {
   private val GameStart = createRegex("gamestart", "([\\w_]+),(False|True),([\\d\\.]+),(False|True)") // ![k[gamestart],v[map_day,False,0,False]]!
   private val Victory = createRegex("victory", "(\\w+),(\\w+)") // ![k[victory],v[Blue,economic]]!
   private val UserNameUpdate = createRegex("userNameUpdate", "([^,]*?),([^,]*?),([^,]*?),([^,]*?),([^,]*?),([^,]*?),([^,]*?),([^,]*?),([^,]*?),([^,]*?)")
-  private val Login = createRegex("loginevent", "(\\d+)") // ![k[loginevent],v[1]]!
+  private val Login = createRegex("loginevent", "([01])") // ![k[loginevent],v[1]]!
 
   // Berrys
   private val BerryDeposit = createRegex("berryDeposit", "(\\d+),(\\d+),(\\d+)") // ![k[berryDeposit],v[884,990,4]]!
@@ -82,7 +82,7 @@ object EventParser {
       case GameStart(map, unknown1, duration, unknown2) => GameStartEvent(map, unknown1.toBoolean, duration.toInt, unknown2.toBoolean)
       case Victory(team, tpe) => VictoryEvent(team, tpe)
       case UserNameUpdate(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10) => UserNameUpdateEvent(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
-      case Login(id) => LoginEvent(id.toInt)
+      case Login(isSuccess) => LoginEvent(isSuccess == "1")
 
       case BerryDeposit(x, y, playerId) => BerryDepositEvent(x.toInt, y.toInt, Player(playerId.toInt))
       case BerryKickIn(x, y, playerId) => BerryKickInEvent(x.toInt, y.toInt, Player(playerId.toInt), None)

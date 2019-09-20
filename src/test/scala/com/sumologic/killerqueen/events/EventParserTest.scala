@@ -28,7 +28,8 @@ class EventParserTest extends TestBase {
       parseAndRecord("![k[gamestart],v[map_day,False,0,False]]!") should be(GameStartEvent("map_day", false, 0, false))
       parseAndRecord("![k[victory],v[Blue,economic]]!") should be(VictoryEvent("Blue", "economic"))
       parseAndRecord("![k[userNameUpdate],v[Rambo,,Chris,,,,,,,]]!") should be(UserNameUpdateEvent("Rambo", "", "Chris", "", "", "", "", "", "", ""))
-      parseAndRecord("![k[loginevent],v[1]]!") should be(LoginEvent(1))
+      parseAndRecord("![k[loginevent],v[1]]!") should be(LoginEvent(true))
+      parseAndRecord("![k[loginevent],v[0]]!") should be(LoginEvent(false))
 
       parseAndRecord("![k[berryDeposit],v[884,990,4]]!") should be(BerryDepositEvent(884, 990, Player(4)))
       parseAndRecord("![k[berryKickIn],v[804,645,2]]!") should be(BerryKickInEvent(804, 645, Player(2), None))
