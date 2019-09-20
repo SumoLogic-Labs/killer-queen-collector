@@ -3,7 +3,7 @@ package com.sumologic.killerqueen.events
 import com.sumologic.killerqueen.Logging
 import com.sumologic.killerqueen.model.InboundEvents._
 import com.sumologic.killerqueen.model.OutboundEvents._
-import com.sumologic.killerqueen.model.{GameplayEvent, OutboundEvent, WireEvent}
+import com.sumologic.killerqueen.model.{GameplayEvent, InboundEvent, OutboundEvent, WireEvent}
 import com.sumologic.killerqueen.state.StateMachine
 
 /**
@@ -15,15 +15,13 @@ import com.sumologic.killerqueen.state.StateMachine
  */
 class EventHandler(eventSender: EventSender,
                    stateMachine: StateMachine = new StateMachine,
-                   victoryHook: () => Unit = () => {}
+                   victoryHook: () => Unit = () => {},
+                   exceptionOnUnknownEvents: Boolean = false
                   ) extends Logging {
   def handle(event: WireEvent): Unit = {
     event match {
       case AliveEvent(_) =>
         eventSender.send(ImAliveEvent("null"))
-
-      case UnknownEvent(key, value) =>
-        warn(s"Encountered unknown event. key: $key - value: $value")
 
       case ConnectedEvent(connectionId) =>
         info(s"Connection opened to cabinet completed ($connectionId)")
@@ -44,10 +42,24 @@ class EventHandler(eventSender: EventSender,
         stateMachine.processEvent(gameplayEvent)
 
       case _: OutboundEvent =>
-      // Noop - no need to do anything for now
+        // Noop - no need to do anything for now
+
+      case _: InboundEvent =>
+        // Noop - no need to do anything for now
+
+      case UnknownEvent(key, value) =>
+        warn(s"Encountered unknown event. key: $key - value: $value")
+
+        if (exceptionOnUnknownEvents) {
+          throw new Exception(s"Unknown event: $event")
+        }
 
       case _ =>
         error(s"Encountered completely unknown event type: ${event.toApi} (scala: $event)")
+
+        if (exceptionOnUnknownEvents) {
+          throw new Exception(s"Unknown event: $event")
+        }
     }
   }
 }

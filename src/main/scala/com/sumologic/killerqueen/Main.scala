@@ -62,6 +62,7 @@ object Main extends App with Logging {
         post {
           formFields('blue_stripes, 'blue_abs, 'blue_queen, 'blue_skulls, 'blue_checkers, 'gold_stripes, 'gold_abs, 'gold_queen, 'gold_skulls, 'gold_checkers) {
             (blueStripes, blueAbs, blueQueen, blueSkulls, blueCheckers, goldStripes, goldAbs, goldQueen, goldSkulls, goldCheckers) =>
+              // TODO: Make sure none of these names have commas in them
               val update = UserNameUpdateEvent(blueStripes, blueAbs, blueQueen, blueSkulls, blueCheckers, goldStripes, goldAbs, goldQueen, goldSkulls, goldCheckers)
               debug(s"Received message ${TextMessage.Strict(update.toApi)}")
               stateMachine.processEvent(update)

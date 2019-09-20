@@ -635,7 +635,7 @@ class StateMachineTest extends TestBase with BeforeAndAfterEach with Logging {
     super.beforeEach()
 
     sut = new StateMachine(exitOnTest = true)
-    handler = new EventHandler(NoopEventSender, sut, checkInvariants)
+    handler = new EventHandler(NoopEventSender, sut, checkInvariants, exceptionOnUnknownEvents = true)
   }
 
   override protected def afterEach(): Unit = {
