@@ -118,7 +118,7 @@ object InboundEvents {
                               y: Int,
                               player: Player,
                               ownTeam: Option[Boolean])
-    extends GameplayEvent("berryKickIn", s"$x,$y,${player.id}${ownTeam.map(_.toString).getOrElse("").capitalize}")
+    extends GameplayEvent("berryKickIn", s"$x,$y,${player.id}${if(ownTeam.isDefined) "," else ""}${ownTeam.map(_.toString).getOrElse("").capitalize}")
 
   /**
    * Player picked up a piece of food.
