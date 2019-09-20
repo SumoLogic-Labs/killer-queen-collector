@@ -29,7 +29,7 @@ object EventParser {
   // Berrys
   private val BerryDeposit = createRegex("berryDeposit", "(\\d+),(\\d+),(\\d+)") // ![k[berryDeposit],v[884,990,4]]!
   private val BerryKickIn = createRegex("berryKickIn", "(\\d+),(\\d+),(\\d+)") // ![k[berryKickIn],v[804,645,2]]!
-  private val BerryKickIn2 = createRegex("berryKickIn", "(\\d+),(\\d+),(\\d+)(True|False)") // ![k[berryKickIn],v[804,645,2True]]!
+  private val BerryKickIn2 = createRegex("berryKickIn", "(\\d+),(\\d+),(\\d+),?(True|False)") // ![k[berryKickIn],v[804,645,2True]]!
   private val CarryFood = createRegex("carryFood", "(\\d+)") // ![k[carryFood],v[10]]!
 
   // Maidens / gates

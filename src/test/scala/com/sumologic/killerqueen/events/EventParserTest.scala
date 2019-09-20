@@ -17,6 +17,10 @@ class EventParserTest extends TestBase {
         result
       }
 
+      def parseButDontRecord(event: String): InboundEvent = {
+        EventParser.parse(event)
+      }
+
       parseAndRecord("![k[alive],v[11:16:11 PM]]!") should be(AliveEvent("11:16:11 PM"))
       parseAndRecord("![k[connected],v[2]]!") should be(ConnectedEvent(2))
       parseAndRecord("![k[gameend],v[map_day,False,71.761,False]]!") should be(GameEndEvent("map_day", false, 71.761, false))
@@ -27,7 +31,8 @@ class EventParserTest extends TestBase {
 
       parseAndRecord("![k[berryDeposit],v[884,990,4]]!") should be(BerryDepositEvent(884, 990, Player(4)))
       parseAndRecord("![k[berryKickIn],v[804,645,2]]!") should be(BerryKickInEvent(804, 645, Player(2), None))
-      parseAndRecord("![k[berryKickIn],v[804,645,2True]]!") should be(BerryKickInEvent(804, 645, Player(2), Some(true)))
+      parseButDontRecord("![k[berryKickIn],v[804,645,2True]]!") should be(BerryKickInEvent(804, 645, Player(2), Some(true))) // Temporarily broken format from some APIs
+      parseAndRecord("![k[berryKickIn],v[804,645,2,True]]!") should be(BerryKickInEvent(804, 645, Player(2), Some(true)))
       parseAndRecord("![k[carryFood],v[10]]!") should be(CarryFoodEvent(Player(10)))
 
       parseAndRecord("![k[blessMaiden],v[1360,260,Blue]]!") should be(BlessMaidenEvent(1360, 260, "Blue"))
