@@ -36,7 +36,7 @@ object Main extends App with Logging {
     val cal = new GregorianCalendar()
 
     val year = cal.get(Calendar.YEAR)
-    val month = pad(cal.get(Calendar.MONTH))
+    val month = pad(cal.get(Calendar.MONTH) + 1)
     val day = pad(cal.get(Calendar.DAY_OF_MONTH) + 1)
 
     new JFile(s"./logs/raw_event_log_$year-$month-$day.log")
