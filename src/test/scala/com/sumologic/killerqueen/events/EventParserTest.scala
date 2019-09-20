@@ -2,22 +2,22 @@ package com.sumologic.killerqueen.events
 
 import com.sumologic.killerqueen.TestBase
 import com.sumologic.killerqueen.model.InboundEvents._
-import com.sumologic.killerqueen.model.{InboundEvent, Player}
+import com.sumologic.killerqueen.model.{Player, WireEvent}
 
 import scala.collection.mutable
 
 class EventParserTest extends TestBase {
   "EventParser" should {
     "Handle known input types" in {
-      val eventAndResult = mutable.Buffer[(String, InboundEvent)]()
+      val eventAndResult = mutable.Buffer[(String, WireEvent)]()
 
-      def parseAndRecord(event: String): InboundEvent = {
+      def parseAndRecord(event: String): WireEvent = {
         val result = EventParser.parse(event)
         eventAndResult.append((event, result))
         result
       }
 
-      def parseButDontRecord(event: String): InboundEvent = {
+      def parseButDontRecord(event: String): WireEvent = {
         EventParser.parse(event)
       }
 

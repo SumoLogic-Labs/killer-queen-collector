@@ -295,7 +295,7 @@ object InboundEvents {
 
   case class UnknownEvent(override val event: String,
                           override val rawValue: String)
-    extends InboundEvent(event, rawValue)
+    extends WireEvent
 
   // This is ours and not sent by game machine
   case class UserNameUpdateEvent(blueStripes: String,

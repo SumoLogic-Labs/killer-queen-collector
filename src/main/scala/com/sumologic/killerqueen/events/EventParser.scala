@@ -1,6 +1,6 @@
 package com.sumologic.killerqueen.events
 
-import com.sumologic.killerqueen.model.{InboundEvent, Player}
+import com.sumologic.killerqueen.model.{Event, Player, WireEvent}
 
 import scala.util.matching.Regex
 
@@ -55,7 +55,7 @@ object EventParser {
   private val GeneralForm = createRegex("(.*?)", "(.*?)")
 
 
-  def parse(event: String): InboundEvent = {
+  def parse(event: String): WireEvent = {
     import com.sumologic.killerqueen.model.InboundEvents._
 
     event match {
