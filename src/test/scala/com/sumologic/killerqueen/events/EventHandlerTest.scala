@@ -14,7 +14,7 @@ class EventHandlerTest extends TestBase with MockitoSugar with BeforeAndAfterEac
   "EventHandler" should {
     "always ping back for AliveEvent" in {
       sut.handle(AliveEvent("a"))
-      verify(eventSender, times(1)).send(ImAliveEvent)
+      verify(eventSender, times(1)).send(ImAliveEvent("null"))
     }
 
     "pass along gameplay events" in {

@@ -338,8 +338,8 @@ object InboundEvents {
  */
 object OutboundEvents {
 
-  case object ImAliveEvent
-    extends OutboundEvent("im alive", "null")
+  case class ImAliveEvent(name: String)
+    extends OutboundEvent("im alive", name)
 
   case class ConnectEvent(name: String,
                           isGameMachine: Boolean)

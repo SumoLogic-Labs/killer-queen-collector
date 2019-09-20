@@ -20,7 +20,7 @@ class EventHandler(eventSender: EventSender,
   def handle(event: InboundEvent): Unit = {
     event match {
       case AliveEvent(_) =>
-        eventSender.send(ImAliveEvent)
+        eventSender.send(ImAliveEvent("null"))
 
       case UnknownEvent(key, value) =>
         warn(s"Encountered unknown event. key: $key - value: $value")
