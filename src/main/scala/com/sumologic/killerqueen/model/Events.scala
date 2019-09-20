@@ -290,6 +290,9 @@ object InboundEvents {
                         isBot: Boolean)
     extends GameplayEvent("spawn", s"${player.id},${isBot.toString.capitalize}")
 
+  case class LoginEvent(id: Int)
+    extends InboundEvent("loginevent", id.toString)
+
   case class UnknownEvent(override val event: String,
                           override val rawValue: String)
     extends InboundEvent(event, rawValue)

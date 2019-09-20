@@ -24,6 +24,7 @@ object EventParser {
   private val GameStart = createRegex("gamestart", "([\\w_]+),(False|True),([\\d\\.]+),(False|True)") // ![k[gamestart],v[map_day,False,0,False]]!
   private val Victory = createRegex("victory", "(\\w+),(\\w+)") // ![k[victory],v[Blue,economic]]!
   private val UserNameUpdate = createRegex("userNameUpdate", "([^,]*?),([^,]*?),([^,]*?),([^,]*?),([^,]*?),([^,]*?),([^,]*?),([^,]*?),([^,]*?),([^,]*?)")
+  private val Login = createRegex("loginevent", "(\\d+)")
 
   // Berrys
   private val BerryDeposit = createRegex("berryDeposit", "(\\d+),(\\d+),(\\d+)") // ![k[berryDeposit],v[884,990,4]]!
@@ -88,6 +89,7 @@ object EventParser {
       case PlayerNames() => PlayerNamesEvent
       case Spawn(playerId, isBot) => SpawnEvent(Player(playerId.toInt), isBot.toBoolean)
 
+      case Login(id) => LoginEvent(id.toInt)
       case GeneralForm(key, value) => UnknownEvent(key, value)
       case _ => throw new Exception(s"Unknown input: $event")
     }
