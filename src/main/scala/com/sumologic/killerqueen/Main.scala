@@ -136,13 +136,14 @@ object Main extends App with Logging {
 
     closed.onComplete {
       _ =>
-        info("Closed connection to cabinet.  Retrying connection")
+        info("Closed connection to cabinet.  Retrying connection in 1 second...")
+        Thread.sleep(1000)
         connectToCabinet(stateMachine)
     }
 
     info("Attempt to start connection to cabinet done.  Waiting.")
 
-    ws ! TextMessage.Strict(OutboundEvents.ConnectEvent("1", false).toApi)
+    ws ! TextMessage.Strict(OutboundEvents.ConnectEvent("2", false).toApi)
   }
 
   private def startLoggingClock(machine: StateMachine): Unit = {
