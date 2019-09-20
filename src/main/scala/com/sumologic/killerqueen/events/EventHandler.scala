@@ -28,7 +28,7 @@ class EventHandler(eventSender: EventSender,
       case ConnectedEvent(connectionId) =>
         info(s"Connection opened to cabinet completed ($connectionId)")
         stateMachine.reset(event)
-        eventSender.send(AdminLogin)
+        eventSender.send(AdminLoginEvent)
 
       case LoginEvent(id) =>
         info(s"Login succeeded")

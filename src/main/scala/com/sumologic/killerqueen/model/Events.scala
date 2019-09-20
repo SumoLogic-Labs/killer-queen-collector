@@ -345,7 +345,7 @@ object OutboundEvents {
                           isGameMachine: Boolean)
     extends OutboundEvent("connect", s"""{"name":"$name","isGameMachine":$isGameMachine}""")
 
-  case object AdminLogin
+  case object AdminLoginEvent
     extends OutboundEvent("adminlogin", "midwife")
 
   case class GetConfigEvent(config: String)
