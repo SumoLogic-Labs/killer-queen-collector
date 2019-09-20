@@ -118,7 +118,7 @@ object InboundEvents {
                               y: Int,
                               player: Player,
                               ownTeam: Option[Boolean])
-    extends GameplayEvent("berryKickIn", s"$x,$y,${player.id}${if(ownTeam.isDefined) "," else ""}${ownTeam.map(_.toString).getOrElse("").capitalize}")
+    extends GameplayEvent("berryKickIn", s"$x,$y,${player.id}${if (ownTeam.isDefined) "," else ""}${ownTeam.map(_.toString).getOrElse("").capitalize}")
 
   /**
    * Player picked up a piece of food.
@@ -328,8 +328,23 @@ object InboundEvents {
 
       Option(candidate).filter(_.trim.nonEmpty)
     }
-
   }
+
+  // TODO: Improve json format below to be rich
+  case class TournamentStatusEvent(unknown1: Int, unknown2: Int)
+    extends InboundEvent("tournamentstatus", s"$unknown1,$unknown2")
+
+  case class TournamentBracketEvent(json: String)
+    extends InboundEvent("bracket", json)
+
+  case class TournamentStartEvent(json: String)
+    extends InboundEvent("tstart", json)
+
+  case class TournamentConcludedEvent(json: String)
+    extends InboundEvent("tournamentconcluded", json)
+
+  case class MachineNamesEvent(jsonArray: String)
+    extends InboundEvent("machinenames", jsonArray)
 
 }
 
@@ -350,5 +365,18 @@ object OutboundEvents {
 
   case class GetConfigEvent(config: String)
     extends OutboundEvent("get", config)
+
+  /**
+   * Only used in tournaments to my knowledge
+   */
+  case class MapSelectEvent(password: String)
+    extends OutboundEvent("mapselect", password)
+
+  // TODO: Definitely refine this
+  case class RestartTourneyEvent(value: String)
+    extends OutboundEvent("restarttourney", value)
+
+  case class AssignToMachineEvent(team: Int, machineName: String)
+    extends OutboundEvent("assigntomachine", s"$team,$machineName")
 
 }

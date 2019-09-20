@@ -57,6 +57,16 @@ object EventParser {
   private val AdminLogin = createRegex("adminlogin", "midwife") // ![k[adminlogin],v[midwife]]!
   private val GetConfig = createRegex("get", "(.+?)") // ![k[get],v[goldonleft]]!
 
+  // Tournament events
+  private val TournamentStatus = createRegex("tournamentstatus", "(\\d+),(\\d+)") // ![k[tournamentstatus],v[0,0]]!
+  private val TournamentBracket = createRegex("bracket", "(.+?)") // ![k[bracket],v[a ton of JSON here]]!
+  private val TournamentStart = createRegex("tstart", "(.+?)") // ![k[tstart],v[a ton of JSON here]]!
+  private val TournamentConcluded = createRegex("tournamentconcluded", "(.+?)") // ![k[tournamentconcluded],v[a ton of JSON here]]!
+  private val MachineNames = createRegex("machinenames", "(.+?)") // ![k[machinenames],v[["KQ"]]]!
+  private val MapSelect = createRegex("mapselect", "(.*?)") // ![k[mapselect],v[]]! or ![k[mapselect],v[midwife]]!
+  private val RestartTourney = createRegex("restarttourney", "(.+?)") // ![k[restarttourney],v[r,asdf,,1,1,1,a,b,c]]!
+  private val AssignToMachine = createRegex("assigntomachine", "(\\d+),(.+?)") // ![k[assigntomachine],v[3,KQ]]!
+
   // Catch all
   private val GeneralForm = createRegex("(.*?)", "(.*?)")
 
@@ -101,6 +111,15 @@ object EventParser {
       case Connect(name, isGameMachine) => ConnectEvent(name, isGameMachine.toBoolean)
       case AdminLogin() => AdminLoginEvent
       case GetConfig(config) => GetConfigEvent(config)
+
+      case TournamentStatus(unknown1, unknown2) => TournamentStatusEvent(unknown1.toInt, unknown2.toInt)
+      case TournamentBracket(json) => TournamentBracketEvent(json)
+      case TournamentStart(json) => TournamentStartEvent(json)
+      case TournamentConcluded(json) => TournamentConcludedEvent(json)
+      case MachineNames(names) => MachineNamesEvent(names)
+      case MapSelect(password) => MapSelectEvent(password)
+      case RestartTourney(value) => RestartTourneyEvent(value)
+      case AssignToMachine(team, machine) => AssignToMachineEvent(team.toInt, machine)
 
       case GeneralForm(key, value) => UnknownEvent(key, value)
       case _ => throw new Exception(s"Unknown input: $event")
