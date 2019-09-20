@@ -24,7 +24,7 @@ object EventParser {
   private val GameStart = createRegex("gamestart", "([\\w_]+),(False|True),([\\d\\.]+),(False|True)") // ![k[gamestart],v[map_day,False,0,False]]!
   private val Victory = createRegex("victory", "(\\w+),(\\w+)") // ![k[victory],v[Blue,economic]]!
   private val UserNameUpdate = createRegex("userNameUpdate", "([^,]*?),([^,]*?),([^,]*?),([^,]*?),([^,]*?),([^,]*?),([^,]*?),([^,]*?),([^,]*?),([^,]*?)")
-  private val Login = createRegex("loginevent", "(\\d+)")
+  private val Login = createRegex("loginevent", "(\\d+)") // ![k[loginevent],v[1]]!
 
   // Berrys
   private val BerryDeposit = createRegex("berryDeposit", "(\\d+),(\\d+),(\\d+)") // ![k[berryDeposit],v[884,990,4]]!
@@ -51,12 +51,19 @@ object EventParser {
   private val PlayerNames = createRegex("playernames", ",,,,,,,,,") // ![k[playernames],v[,,,,,,,,,]]!
   private val Spawn = createRegex("spawn", "(\\d+),(\\w+)") // ![k[spawn],v[1,False]]!
 
+  // Outbound events
+  private val ImAlive = createRegex("im alive", "(.+?)") // ![k[im alive],v[null]]!
+  private val Connect = createRegex("connect", "\\{\"name\":\"(.+?)\",\"isGameMachine\":(true|false)\\}") // "![k[connect],v[{\"name\":\"1\",\"isGameMachine\":false}]]!"
+  private val AdminLogin = createRegex("adminlogin", "midwife") // ![k[adminlogin],v[midwife]]!
+  private val GetConfig = createRegex("get", "(.+?)") // ![k[get],v[goldonleft]]!
+
   // Catch all
   private val GeneralForm = createRegex("(.*?)", "(.*?)")
 
 
   def parse(event: String): WireEvent = {
     import com.sumologic.killerqueen.model.InboundEvents._
+    import com.sumologic.killerqueen.model.OutboundEvents._
 
     event match {
       case Alive(timestamp) => AliveEvent(timestamp)
@@ -65,6 +72,7 @@ object EventParser {
       case GameStart(map, unknown1, duration, unknown2) => GameStartEvent(map, unknown1.toBoolean, duration.toInt, unknown2.toBoolean)
       case Victory(team, tpe) => VictoryEvent(team, tpe)
       case UserNameUpdate(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10) => UserNameUpdateEvent(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
+      case Login(id) => LoginEvent(id.toInt)
 
       case BerryDeposit(x, y, playerId) => BerryDepositEvent(x.toInt, y.toInt, Player(playerId.toInt))
       case BerryKickIn(x, y, playerId) => BerryKickInEvent(x.toInt, y.toInt, Player(playerId.toInt), None)
@@ -89,7 +97,11 @@ object EventParser {
       case PlayerNames() => PlayerNamesEvent
       case Spawn(playerId, isBot) => SpawnEvent(Player(playerId.toInt), isBot.toBoolean)
 
-      case Login(id) => LoginEvent(id.toInt)
+      case ImAlive(text) => ImAliveEvent(text)
+      case Connect(name, isGameMachine) => ConnectEvent(name, isGameMachine.toBoolean)
+      case AdminLogin() => AdminLoginEvent
+      case GetConfig(config) => GetConfigEvent(config)
+
       case GeneralForm(key, value) => UnknownEvent(key, value)
       case _ => throw new Exception(s"Unknown input: $event")
     }

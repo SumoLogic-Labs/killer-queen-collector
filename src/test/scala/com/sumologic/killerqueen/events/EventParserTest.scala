@@ -2,6 +2,7 @@ package com.sumologic.killerqueen.events
 
 import com.sumologic.killerqueen.TestBase
 import com.sumologic.killerqueen.model.InboundEvents._
+import com.sumologic.killerqueen.model.OutboundEvents._
 import com.sumologic.killerqueen.model.{Player, WireEvent}
 
 import scala.collection.mutable
@@ -51,6 +52,11 @@ class EventParserTest extends TestBase {
       parseAndRecord("![k[playerKill],v[1006,20,10,5,Worker]]!") should be(PlayerKillEvent(1006, 20, Player(10), Player(5), "Worker"))
       parseAndRecord("![k[playernames],v[,,,,,,,,,]]!") should be(PlayerNamesEvent)
       parseAndRecord("![k[spawn],v[1,False]]!") should be(SpawnEvent(Player(1), false))
+
+      parseAndRecord("![k[im alive],v[null2]]!") should be(ImAliveEvent("null2"))
+      parseAndRecord("![k[connect],v[{\"name\":\"1\",\"isGameMachine\":false}]]!") should be(ConnectEvent("1", false))
+      parseAndRecord("![k[adminlogin],v[midwife]]!") should be(AdminLoginEvent)
+      parseAndRecord("![k[get],v[goldonleft]]!") should be(GetConfigEvent("goldonleft"))
 
       intercept[Exception] {
         EventParser.parse("asdf")
