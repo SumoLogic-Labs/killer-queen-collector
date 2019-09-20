@@ -58,7 +58,7 @@ object EventParser {
   private val GetConfig = createRegex("get", "(.+?)") // ![k[get],v[goldonleft]]!
 
   // Tournament events
-  private val TournamentStatus = createRegex("tournamentstatus", "(\\d+),(\\d+)") // ![k[tournamentstatus],v[0,0]]!
+  private val TournamentStatus = createRegex("tournamentstatus", "([01]),([01])") // ![k[tournamentstatus],v[0,0]]!
   private val TournamentBracket = createRegex("bracket", "(.+?)") // ![k[bracket],v[a ton of JSON here]]!
   private val TournamentStart = createRegex("tstart", "(.+?)") // ![k[tstart],v[a ton of JSON here]]!
   private val TournamentConcluded = createRegex("tournamentconcluded", "(.+?)") // ![k[tournamentconcluded],v[a ton of JSON here]]!
@@ -112,7 +112,7 @@ object EventParser {
       case AdminLogin() => AdminLoginEvent
       case GetConfig(config) => GetConfigEvent(config)
 
-      case TournamentStatus(unknown1, unknown2) => TournamentStatusEvent(unknown1.toInt, unknown2.toInt)
+      case TournamentStatus(isStarted, isConcluded) => TournamentStatusEvent(isStarted == "1", isConcluded == "1")
       case TournamentBracket(json) => TournamentBracketEvent(json)
       case TournamentStart(json) => TournamentStartEvent(json)
       case TournamentConcluded(json) => TournamentConcludedEvent(json)

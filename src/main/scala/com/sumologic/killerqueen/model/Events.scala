@@ -330,10 +330,10 @@ object InboundEvents {
     }
   }
 
-  // TODO: Improve json format below to be rich
-  case class TournamentStatusEvent(unknown1: Int, unknown2: Int)
-    extends InboundEvent("tournamentstatus", s"$unknown1,$unknown2")
+  case class TournamentStatusEvent(isStarted: Boolean, isConcluded: Boolean)
+    extends InboundEvent("tournamentstatus", s"${if(isStarted) 1 else 0},${if(isConcluded) 1 else 0}")
 
+  // TODO: Improve json format below to be rich
   case class TournamentBracketEvent(json: String)
     extends InboundEvent("bracket", json)
 
