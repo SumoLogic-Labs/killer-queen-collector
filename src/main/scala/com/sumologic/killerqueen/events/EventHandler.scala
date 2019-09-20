@@ -28,6 +28,12 @@ class EventHandler(eventSender: EventSender,
       case ConnectedEvent(connectionId) =>
         info(s"Connection opened to cabinet completed ($connectionId)")
         stateMachine.reset(event)
+        eventSender.send(AdminLogin)
+
+      case LoginEvent(id) =>
+        info(s"Login succeeded")
+        eventSender.send(GetConfigEvent("goldonleft")) // TODO: This doesn't actually work, despite suggestions that it does.  Needs further investigation.
+        eventSender.send(GetConfigEvent("tournamentstatus")) // Proof that this GetConfigEvent works
 
       case victoryEvent: VictoryEvent =>
         stateMachine.processEvent(victoryEvent)
