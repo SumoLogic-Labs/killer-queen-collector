@@ -208,6 +208,10 @@ class StateMachineTest extends TestBase with BeforeAndAfterEach with Logging {
         // This is actually a huge pile of days, both release and beta builds
         testResource("/raw_event_log_2019-08-16.txt")
       }
+
+      "its September 20th 2019" in {
+        testResource("/raw_event_log_2019-09-20.txt")
+      }
     }
 
     "handle connecting part way through a game" in {
