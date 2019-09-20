@@ -6,13 +6,13 @@ class EventsTest extends TestBase {
 
   "OutboundEvents.ConnectEvent" should {
     "serialize properly" in {
-      new OutboundEvents.ConnectEvent("1", false).toApi should be("![k[connect],v[{\"name\":\"1\",\"isGameMachine\":false}]]!")
+      OutboundEvents.ConnectEvent("1", false).toApi should be("![k[connect],v[{\"name\":\"1\",\"isGameMachine\":false}]]!")
     }
   }
 
   "InboundEvents.BlessMaidenEvent" should {
     "properly translate between Gold and Red" in {
-      new InboundEvents.BlessMaidenEvent(1, 2, "Gold").toApi should be("![k[blessMaiden],v[1,2,Red]]!")
+      InboundEvents.BlessMaidenEvent(1, 2, "Gold").toApi should be("![k[blessMaiden],v[1,2,Red]]!")
     }
   }
 

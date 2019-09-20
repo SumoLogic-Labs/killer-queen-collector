@@ -297,6 +297,7 @@ object InboundEvents {
                           override val rawValue: String)
     extends InboundEvent(event, rawValue)
 
+  // This is ours and not sent by game machine
   case class UserNameUpdateEvent(blueStripes: String,
                                  blueAbs: String,
                                  blueQueen: String,
@@ -309,7 +310,6 @@ object InboundEvents {
                                  goldCheckers: String
                                 )
     extends GameplayEvent("userNameUpdate", s"$blueStripes,$blueAbs,$blueQueen,$blueSkulls,$blueCheckers,$goldStripes,$goldAbs,$goldQueen,$goldSkulls,$goldCheckers") {
-
 
     def get(playerId: Int): Option[String] = {
       val candidate = playerId match {
