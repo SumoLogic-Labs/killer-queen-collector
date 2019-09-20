@@ -120,7 +120,8 @@ object Main extends App with Logging {
         .toMat(messageSink)(Keep.both)
         .run()
 
-    handlerOpt = Some(new EventHandler(new ActorRefEventSender(ws, messageRecorder), stateMachine))
+    val sender = new ActorRefEventSender(ws, messageRecorder)
+    handlerOpt = Some(new EventHandler(sender, stateMachine))
 
     info("Connecting to KQ cabinet")
 
@@ -143,7 +144,7 @@ object Main extends App with Logging {
 
     info("Attempt to start connection to cabinet done.  Waiting.")
 
-    ws ! TextMessage.Strict(OutboundEvents.ConnectEvent("2", false).toApi)
+    sender.send(OutboundEvents.ConnectEvent("2", false))
   }
 
   private def startLoggingClock(machine: StateMachine): Unit = {
