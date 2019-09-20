@@ -120,7 +120,7 @@ object Main extends App with Logging {
         .toMat(messageSink)(Keep.both)
         .run()
 
-    handlerOpt = Some(new EventHandler(new ActorRefEventSender(ws), stateMachine))
+    handlerOpt = Some(new EventHandler(new ActorRefEventSender(ws, messageRecorder), stateMachine))
 
     info("Connecting to KQ cabinet")
 

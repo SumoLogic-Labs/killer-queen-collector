@@ -10,9 +10,11 @@ trait EventSender {
 }
 
 
-class ActorRefEventSender(actorRef: ActorRef) extends EventSender with Logging {
+class ActorRefEventSender(actorRef: ActorRef, rawMessageRecorder: RawMessageRecorder)
+  extends EventSender with Logging {
   override def send(event: OutboundEvent): Unit = {
     debug(s"Sending $event")
+    rawMessageRecorder.writeToFile(event.toApi)
     actorRef ! TextMessage.Strict(event.toApi)
   }
 }
